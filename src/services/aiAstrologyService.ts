@@ -11,7 +11,7 @@ function getGenAIClient(): GoogleGenAI {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     
     if (!apiKey) {
-      throw new Error("Missing Gemini API Key. Please set VITE_GEMINI_API_KEY in your environment or Settings menu.");
+      throw new Error("Missing Gemini API Key. If you are on a custom domain (GitHub Pages), please ensure you have added VITE_GEMINI_API_KEY to your GitHub Repository Secrets and that the Actions build has finished successfully.");
     }
     genAIClient = new GoogleGenAI({ apiKey });
   }
