@@ -14,22 +14,24 @@ export const Navbar = () => {
           </span>
         </div>
         
-        <div className="hidden md:flex items-center gap-8">
-          <div className="flex items-center gap-2 text-sm font-medium text-amber-200/80">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            52,402 Reports Generated
-          </div>
+        <div className="hidden md:flex items-center gap-10">
           <button 
-            onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-            className="btn-secondary"
+            onClick={() => document.getElementById('panjika')?.scrollIntoView({ behavior: 'smooth' })}
+            className="text-xs uppercase tracking-[0.2em] font-bold text-gray-400 hover:text-gold transition-all"
+          >
+            Auspicious Panjika
+          </button>
+          <button 
+            onClick={() => document.getElementById('horoscope')?.scrollIntoView({ behavior: 'smooth' })}
+            className="text-xs uppercase tracking-[0.2em] font-bold text-gray-400 hover:text-gold transition-all"
           >
             Daily Horoscope
           </button>
           <button 
              onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-             className="px-5 py-2 bg-amber-500 text-black font-bold rounded-full text-sm shadow-[0_0_20px_rgba(245,158,11,0.4)] active:scale-95 transition-all"
+             className="px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold rounded-full text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.3)] active:scale-95 transition-all"
           >
-            Get Your Report
+            Get Expert Report
           </button>
         </div>
       </div>

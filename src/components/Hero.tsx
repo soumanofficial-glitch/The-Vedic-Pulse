@@ -42,12 +42,20 @@ export const Hero = () => {
                Trusted by 1.2M+ Seekers
              </div>
              <div className="h-10 w-px bg-white/10 hidden sm:block"></div>
-             <button 
-              onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-              className="btn-primary px-10"
-             >
-                Get My Report
-             </button>
+             <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+              <button 
+                onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+                className="btn-primary px-10"
+              >
+                  Get My Report
+              </button>
+              <button 
+                onClick={() => document.getElementById('panjika')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-8 py-5 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 active:scale-95 transition-all text-[10px] sm:text-xs uppercase tracking-widest whitespace-nowrap"
+              >
+                  Auspicious Timings
+              </button>
+             </div>
           </div>
         </div>
 

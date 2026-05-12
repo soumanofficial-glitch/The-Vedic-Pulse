@@ -50,10 +50,10 @@ export const Footer = () => {
             <div>
               <h4 className="font-bold text-xs uppercase tracking-[0.2em] mb-6 text-amber-200/50">Quick Links</h4>
               <ul className="space-y-4 text-xs font-semibold uppercase tracking-widest text-gray-500">
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Daily Horoscope</a></li>
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Muhurat Calendar</a></li>
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Compatibility</a></li>
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Vastu Tips</a></li>
+                <li><button onClick={() => document.getElementById('horoscope')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Daily Horoscope</button></li>
+                <li><button onClick={() => document.getElementById('panjika')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Muhurat Calendar</button></li>
+                <li><button onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Compatibility</button></li>
+                <li><button onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Vastu Tips</button></li>
               </ul>
             </div>
 

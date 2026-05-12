@@ -13,6 +13,7 @@ import { AstrologyForm } from "./components/AstrologyForm";
 import { PaymentFlow } from "./components/PaymentFlow";
 import { ReportDashboard } from "./components/ReportDashboard";
 import { PanjikaSection, FloatingToday } from "./components/panjika/PanjikaSection";
+import { ZodiacHoroscope } from "./components/ZodiacHoroscope";
 import { Testimonials } from "./components/Testimonials";
 import { Footer } from "./components/Footer";
 import { generateAstrologyReport } from "./services/aiAstrologyService";
@@ -68,6 +69,7 @@ export default function App() {
 
       <main>
         <Hero />
+        <ZodiacHoroscope />
         <ProductGrid onSelect={handleProductSelect} />
         <PanjikaSection />
         <Testimonials />
