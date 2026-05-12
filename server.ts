@@ -19,20 +19,24 @@ async function startServer() {
   app.post("/api/generate-astrology", async (req, res) => {
     const { prompt } = req.body;
     
-    const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    const apiKey = (process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY)?.trim();
     if (!apiKey) {
-      return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server. Please add it to your Vercel Environment Variables." });
+      return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server. Please add it to your environment variables." });
     }
 
     try {
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
         }
       });
+
+      if (!response || !response.text) {
+        throw new Error("AI returned an empty response.");
+      }
 
       const responseText = response.text;
       // Safety check for parsing JSON from Gemini
