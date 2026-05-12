@@ -17,17 +17,16 @@ app.post("/api/generate-astrology", async (req, res) => {
   }
 
   try {
-    const genAI = new GoogleGenAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
+    const ai = new GoogleGenAI({ apiKey });
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: prompt,
+      config: {
         responseMimeType: "application/json",
       }
     });
 
-    const responseText = result.response.text();
+    const responseText = response.text;
     // Safety check for parsing JSON from Gemini
     try {
         const cleanText = responseText.replace(/```json\n?|\n?```/g, "").trim();
