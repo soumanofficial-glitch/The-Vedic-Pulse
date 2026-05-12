@@ -7,11 +7,11 @@ let genAIClient: GoogleGenAI | null = null;
 
 function getGenAIClient(): GoogleGenAI {
   if (!genAIClient) {
-    // Priority: Environment Variable -> Hardcoded Fallback
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyBATs5zPTdPu2a72eDadxcu0YYVPBtZRrg";
+    // Only use environment variable
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     
-    if (!apiKey || apiKey === "YOUR_API_KEY_HERE") {
-      throw new Error("Missing Gemini API Key. Please ensure the API key is correctly configured.");
+    if (!apiKey) {
+      throw new Error("Missing Gemini API Key. Please set VITE_GEMINI_API_KEY in your environment or Settings menu.");
     }
     genAIClient = new GoogleGenAI({ apiKey });
   }
