@@ -15,41 +15,9 @@ async function startServer() {
   app.use(express.json());
   app.use(cors());
 
-  // Gemini API Proxy
-  app.post("/api/generate-astrology", async (req, res) => {
-    const { prompt } = req.body;
-    
-    const apiKey = (process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY)?.trim();
-    if (!apiKey) {
-      return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server. Please add it to your environment variables." });
-    }
-
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-        }
-      });
-
-      if (!response || !response.text) {
-        throw new Error("AI returned an empty response.");
-      }
-
-      const responseText = response.text;
-      // Safety check for parsing JSON from Gemini
-      try {
-        const cleanText = responseText.replace(/```json\n?|\n?```/g, "").trim();
-        res.json(JSON.parse(cleanText));
-      } catch (e) {
-        res.json({ error: "Failed to parse AI response as JSON", raw: responseText });
-      }
-    } catch (error: any) {
-      console.error("Gemini API Error:", error);
-      res.status(500).json({ error: error.message || "Failed to generate astrology report" });
-    }
+  // Health check
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok" });
   });
 
   if (process.env.NODE_ENV !== "production") {

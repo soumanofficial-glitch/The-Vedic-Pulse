@@ -63,10 +63,10 @@ export const ReportDashboard = ({
 
             {/* Quick Insights */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <InfoCard icon={<Star className="text-amber-400" />} label="Lucky Number" value={report.luckyNumber.toString()} />
-              <InfoCard icon={<Zap className="text-amber-500" />} label="Lucky Color" value={report.luckyColor} />
-              <InfoCard icon={<TrendingUp className="text-cyan-400" />} label="Financial" value={report.financialEnergy} />
-              <InfoCard icon={<Heart className="text-rose-500" />} label="Relationship" value={report.relationshipEnergy} />
+              <InfoCard icon={<Star className="text-amber-400" />} label="Lucky Number" value={(report.luckyNumber ?? '-').toString()} />
+              <InfoCard icon={<Zap className="text-amber-500" />} label="Lucky Color" value={report.luckyColor || 'Not specified'} />
+              <InfoCard icon={<TrendingUp className="text-cyan-400" />} label="Financial" value={report.financialEnergy || 'N/A'} />
+              <InfoCard icon={<Heart className="text-rose-500" />} label="Relationship" value={report.relationshipEnergy || 'N/A'} />
             </div>
 
             {/* Detailed Insight */}
