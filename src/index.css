@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&family=Outfit:wght@300;400;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cinzel", serif;
+  --font-heading: "Outfit", sans-serif;
+  
+  --color-cosmic-dark: #050508;
+  --color-cosmic-purple: #1a0b2e;
+  --color-amber-accent: #f59e0b;
+  --color-gold: #d4af37;
+  --color-gold-glow: #f9d976;
+}
+
+@layer base {
+  body {
+    @apply bg-cosmic-dark text-white font-sans antialiased selection:bg-amber-500/30;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl;
+  }
+  
+  .gold-text {
+    @apply bg-gradient-to-b from-white via-white to-gray-500 bg-clip-text text-transparent;
+  }
+
+  .amber-glow-text {
+    @apply text-amber-accent;
+  }
+  
+  .btn-primary {
+    @apply relative overflow-hidden bg-amber-accent text-black font-black uppercase tracking-widest py-4 px-8 rounded-2xl transition-all active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.4)];
+  }
+
+  .btn-secondary {
+    @apply bg-white/5 border border-white/10 text-white font-medium py-3 px-6 rounded-full hover:bg-white/10 transition-all active:scale-95 text-sm;
+  }
+
+  .badge-amber {
+    @apply px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] uppercase tracking-[0.2em] font-bold rounded;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+.cosmic-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: twinkle var(--duration) ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+.zodiac-wheel {
+  @apply opacity-10 pointer-events-none;
+  animation: rotate 120s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
