@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Copy, CheckCircle, ShieldCheck, X, AlertCircle, Loader2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { functions } from "../lib/firebase";
+import { httpsCallable } from "firebase/functions";
 
 declare global {
   interface Window {
@@ -33,15 +35,22 @@ export const PaymentFlow = ({
 
     try {
       // Step 1: Create Order on Backend
-      const response = await fetch("/api/create-order", {
+      console.log("Fetching /pay-api/create-order with amount:", price * 100);
+      const response = await fetch("/pay-api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: price * 100 }), // amount in paise
       });
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Failed to create payment order");
+        const text = await response.text();
+        console.error("Server Error Response:", text);
+        try {
+          const errData = JSON.parse(text);
+          throw new Error(errData.error || "Failed to create payment order");
+        } catch (e) {
+          throw new Error(`Server returned non-JSON response: ${text.substring(0, 100)}...`);
+        }
       }
 
       const order = await response.json();
@@ -58,7 +67,7 @@ export const PaymentFlow = ({
           // Step 3: Verify Payment Signature
           setStep("processing");
           try {
-            const verificationResponse = await fetch("/api/verify-payment", {
+            const verificationResponse = await fetch("/pay-api/verify-payment", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -84,7 +93,7 @@ export const PaymentFlow = ({
           }
         },
         prefill: {
-          name: "", // Can be passed from props if available
+          name: "", 
           email: "",
           contact: "",
         },

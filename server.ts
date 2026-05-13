@@ -7,31 +7,58 @@ import cors from "cors";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
+// Handle potential ESM/CJS default import discrepancies
+const RazorpayConstructor = (Razorpay as any).default || Razorpay;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+console.log("[SERVER] Initializing server.ts...");
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  // IMPORTANT: Middleware order matters
   app.use(cors());
+  app.use(express.json());
+
+  // Request logging middleware
+  app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+  });
 
   // Razorpay instance
-  const razorpay = new Razorpay({
+  const razorpay = new RazorpayConstructor({
     key_id: process.env.RAZORPAY_KEY_ID || "",
     key_secret: process.env.RAZORPAY_KEY_SECRET || "",
   });
 
   // Health check
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok" });
+  app.get("/pay-api/health", (req, res) => {
+    res.json({ status: "ok", time: new Date().toISOString() });
+  });
+
+  // Debug route
+  app.get("/pay-api/debug", (req, res) => {
+    const key = process.env.RAZORPAY_KEY_ID || "";
+    res.json({ 
+      message: "Payment API routes are registered",
+      env: process.env.NODE_ENV,
+      keyHint: key ? `${key.substring(0, 8)}...` : "missing"
+    });
   });
 
   // Create Razorpay Order
-  app.post("/api/create-order", async (req, res) => {
+  app.all("/pay-api/create-order", async (req, res) => {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed. Use POST." });
+    }
     try {
       const { amount, currency = "INR" } = req.body;
+      
+      console.log(`[PAYMENT] Creating order for amount: ${amount}`);
 
       if (!amount || amount < 100) {
         return res.status(400).json({ error: "Amount must be at least 100 paise" });
@@ -46,15 +73,17 @@ async function startServer() {
       const order = await razorpay.orders.create(options);
       res.json(order);
     } catch (error) {
-      console.error("Razorpay Create Order Error:", error);
-      res.status(500).json({ error: "Failed to create Razorpay order" });
+      console.error("[PAYMENT] Create Order Error:", error);
+      res.status(500).json({ error: "Failed to create Razorpay order", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
   // Verify Razorpay Signature
-  app.post("/api/verify-payment", async (req, res) => {
+  app.post("/pay-api/verify-payment", async (req, res) => {
     try {
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+      
+      console.log(`[PAYMENT] Verifying payment for order: ${razorpay_order_id}`);
 
       if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
         return res.status(400).json({ error: "Missing required payment fields" });
