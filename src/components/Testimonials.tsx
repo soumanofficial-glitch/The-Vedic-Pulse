@@ -7,19 +7,22 @@ const TESTIMONIALS = [
     name: "Sunita Verma",
     location: "Mumbai",
     text: "The business success timing report was spot on! I signed my biggest contract during the recommended Muhurat.",
-    rating: 5
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1589131008272-392da258814a?w=100&h=100&fit=crop"
   },
   {
     name: "Rahul K.",
     location: "Delhi",
     text: "Amazing accuracy for just ₹12. The daily luck score helps me plan my high-stakes meetings with confidence.",
-    rating: 5
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1566753323558-f4e0952af115?w=100&h=100&fit=crop"
   },
   {
     name: "Priyanka S.",
     location: "Bangalore",
     text: "Vedic insights that actually make sense. The Love Compatibility snapshot was surprisingly deep and accurate.",
-    rating: 4
+    rating: 4,
+    image: "https://images.unsplash.com/photo-1619615599813-094e66b4491c?w=100&h=100&fit=crop"
   }
 ];
 
@@ -50,8 +53,8 @@ export const Testimonials = () => {
               </div>
               <p className="text-gray-300 italic mb-8 leading-relaxed font-serif">"{t.text}"</p>
               <div className="mt-auto flex items-center gap-3 pt-6 border-t border-white/5">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-bold text-black shadow-lg shadow-amber-500/20">
-                  {t.name[0]}
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shadow-lg shadow-amber-500/10">
+                  <img src={t.image} alt={t.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 </div>
                 <div>
                   <div className="font-bold text-sm text-amber-100">{t.name}</div>

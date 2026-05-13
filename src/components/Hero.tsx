@@ -31,9 +31,18 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
 
           <div className="flex flex-col sm:flex-row items-center gap-6 pt-4 justify-center lg:justify-start">
              <div className="flex -space-x-3">
-               {[1, 2, 3].map(i => (
-                 <div key={i} className="w-10 h-10 rounded-full border-2 border-[#050508] bg-gray-600 flex items-center justify-center text-[10px] font-bold">
-                   {i === 3 ? "1M+" : ""}
+               {[
+                 "https://images.unsplash.com/photo-1513956589380-bad6acb9b9d4?w=100&h=100&fit=crop",
+                 "https://images.unsplash.com/photo-1566753323558-f4e0952af115?w=100&h=100&fit=crop",
+                 "https://images.unsplash.com/photo-1589131008272-392da258814a?w=100&h=100&fit=crop"
+               ].map((src, i) => (
+                 <div key={i} className="w-10 h-10 rounded-full border-2 border-[#050508] overflow-hidden bg-gray-600 flex items-center justify-center text-[10px] font-bold">
+                   <img 
+                    src={src} 
+                    alt={`User ${i+1}`} 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                   />
                  </div>
                ))}
              </div>
