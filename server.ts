@@ -36,12 +36,12 @@ async function startServer() {
   });
 
   // Health check
-  app.get("/pay-api/health", (req, res) => {
+  app.get("/api/health", (req, res) => {
     res.json({ status: "ok", time: new Date().toISOString() });
   });
 
   // Debug route
-  app.get("/pay-api/debug", (req, res) => {
+  app.get("/api/debug", (req, res) => {
     const key = process.env.RAZORPAY_KEY_ID || "";
     res.json({ 
       message: "Payment API routes are registered",
@@ -51,7 +51,7 @@ async function startServer() {
   });
 
   // Create Razorpay Order
-  app.all("/pay-api/create-order", async (req, res) => {
+  app.all("/api/create-order", async (req, res) => {
     if (req.method !== "POST") {
       return res.status(405).json({ error: "Method not allowed. Use POST." });
     }
@@ -79,7 +79,7 @@ async function startServer() {
   });
 
   // Verify Razorpay Signature
-  app.post("/pay-api/verify-payment", async (req, res) => {
+  app.post("/api/verify-payment", async (req, res) => {
     try {
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
       

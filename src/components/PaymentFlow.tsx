@@ -35,8 +35,8 @@ export const PaymentFlow = ({
 
     try {
       // Step 1: Create Order on Backend
-      console.log("Fetching /pay-api/create-order with amount:", price * 100);
-      const response = await fetch("/pay-api/create-order", {
+      console.log("Fetching /api/create-order with amount:", price * 100);
+      const response = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: price * 100 }), // amount in paise
@@ -67,7 +67,7 @@ export const PaymentFlow = ({
           // Step 3: Verify Payment Signature
           setStep("processing");
           try {
-            const verificationResponse = await fetch("/pay-api/verify-payment", {
+            const verificationResponse = await fetch("/api/verify-payment", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
