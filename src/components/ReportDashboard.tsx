@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import { 
   ArrowLeft, 
   Download, 
@@ -30,6 +32,49 @@ export const ReportDashboard = ({
   onClose: () => void;
 }) => {
   const [activeTab, setActiveTab] = useState<"overview" | "planetary" | "life" | "remedies">("overview");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const reportRef = React.useRef<HTMLDivElement>(null);
+
+  const handleDownloadPDF = async () => {
+    if (isGenerating) return;
+    setIsGenerating(true);
+    
+    try {
+      const element = reportRef.current;
+      if (!element) return;
+
+      // Temporary show the hidden comprehensive report
+      element.style.display = "block";
+      
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#05070a",
+        logging: false,
+      });
+      
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+      
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Karmic_Blueprint_${details.name.replace(/\s+/g, "_")}.pdf`);
+      
+      // Hide back
+      element.style.display = "none";
+    } catch (error) {
+      console.error("PDF Generation failed:", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <motion.div 
@@ -51,8 +96,17 @@ export const ReportDashboard = ({
                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                 <span className="text-[10px] font-black uppercase tracking-tighter text-gray-400">Verified System</span>
              </div>
-             <button className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-full text-xs font-black uppercase tracking-widest hover:bg-white transition-all">
-                <Download size={14} /> Download PDF
+             <button 
+                onClick={handleDownloadPDF}
+                disabled={isGenerating}
+                className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-full text-xs font-black uppercase tracking-widest hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isGenerating ? (
+                  <div className="w-3 h-3 border-2 border-navy border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Download size={14} />
+                )} 
+                {isGenerating ? "Preparing..." : "Download PDF"}
              </button>
           </div>
         </div>
@@ -237,6 +291,92 @@ export const ReportDashboard = ({
              Authentic Vedic Analysis • Certified Jyotish Standards<br />
              Document Ref: JG-{Math.random().toString(36).substring(7).toUpperCase()}
            </p>
+        </div>
+      </div>
+
+      {/* Hidden PDF Printable Version */}
+      <div 
+        ref={reportRef} 
+        style={{ display: "none", width: "794px", padding: "40px", backgroundColor: "#05070a", color: "white" }}
+        className="font-sans"
+      >
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 border border-gold/30 rounded-full flex items-center justify-center bg-white/5 mx-auto mb-4">
+            <Star className="text-gold w-6 h-6" />
+          </div>
+          <h1 className="font-serif text-4xl text-white italic mb-2">The Bhrigu Samhita Analysis</h1>
+          <p className="text-gold/60 font-mono text-[10px] tracking-widest uppercase">Verified Karmic Blueprint for {details.name}</p>
+          <div className="flex justify-center gap-4 text-[8px] font-black uppercase tracking-widest text-gray-500 mt-4">
+            <span>DOB: {details.dob}</span>
+            <span>TOB: {details.tob}</span>
+            <span>POB: {details.pob}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 mb-10">
+          <div className="border border-white/10 p-4 rounded-xl bg-white/5">
+            <div className="text-[8px] font-black text-amber-500/50 uppercase mb-2">Lucky Number</div>
+            <div className="text-2xl font-black text-white italic">#{report.luckyNumber}</div>
+          </div>
+          <div className="border border-white/10 p-4 rounded-xl bg-white/5">
+            <div className="text-[8px] font-black text-indigo-400/50 uppercase mb-2">Luck Score</div>
+            <div className="text-2xl font-black text-white italic">{report.luckScore}%</div>
+          </div>
+          <div className="border border-white/10 p-4 rounded-xl bg-white/5">
+            <div className="text-[8px] font-black text-emerald-400/50 uppercase mb-2">Vitality Index</div>
+            <div className="text-2xl font-black text-white italic">{report.energyScore}%</div>
+          </div>
+        </div>
+
+        <div className="space-y-10">
+          <div className="space-y-4">
+            <h3 className="text-gold text-[10px] uppercase font-black tracking-widest">Soul Purpose</h3>
+            <p className="text-sm text-gray-300 italic leading-relaxed border-l border-gold/30 pl-4">{report.karmicDuty}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-4">
+               <h3 className="text-gold text-[10px] uppercase font-black tracking-widest">Spiritual Insight</h3>
+               <p className="text-xs text-gray-400 leading-relaxed">{report.personalizedInsight}</p>
+            </div>
+            <div className="space-y-4">
+               <h3 className="text-gold text-[10px] uppercase font-black tracking-widest">Favorable Muhurats</h3>
+               <p className="text-xs text-amber-400 font-mono leading-relaxed">{report.favorableTimings}</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+             <h3 className="text-indigo-400 text-[10px] uppercase font-black tracking-widest">Mahadasha Period</h3>
+             <p className="text-xs text-gray-400 leading-relaxed italic">"{report.mahadashaPeriod}"</p>
+          </div>
+
+          <div className="space-y-4">
+             <h3 className="text-cyan-400 text-[10px] uppercase font-black tracking-widest">Career & Wealth</h3>
+             <p className="text-xs text-gray-400 leading-relaxed italic">"{report.careerAnalysis}"</p>
+          </div>
+
+          <div className="space-y-4">
+             <h3 className="text-rose-400 text-[10px] uppercase font-black tracking-widest">Love & Relationships</h3>
+             <p className="text-xs text-gray-400 leading-relaxed italic">"{report.loveAnalysis}"</p>
+          </div>
+
+          <div className="space-y-4">
+             <h3 className="text-orange-500 text-[10px] uppercase font-black tracking-widest">Daily Sadhana & Remedies</h3>
+             <p className="text-xs text-gray-300 italic mb-4">"{report.dailySadhana}"</p>
+             <div className="grid grid-cols-2 gap-2">
+                {report.remedies.map((r: string, i: number) => (
+                  <div key={i} className="text-[10px] text-gray-400 flex items-center gap-2">
+                    <div className="w-1 h-1 bg-emerald-500 rounded-full" /> {r}
+                  </div>
+                ))}
+             </div>
+          </div>
+        </div>
+
+        <div className="mt-20 pt-8 border-t border-white/10 text-center">
+          <p className="text-[8px] font-black uppercase tracking-[0.3em] text-gray-600">
+            Certified Vedic Jyotish Document • {new Date().toLocaleDateString()}
+          </p>
         </div>
       </div>
     </motion.div>
