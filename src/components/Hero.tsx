@@ -32,9 +32,9 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
           <div className="flex flex-col sm:flex-row items-center gap-6 pt-4 justify-center lg:justify-start">
              <div className="flex -space-x-3">
                {[
-                 "https://images.unsplash.com/photo-1513956589380-bad6acb9b9d4?w=100&h=100&fit=crop",
-                 "https://images.unsplash.com/photo-1566753323558-f4e0952af115?w=100&h=100&fit=crop",
-                 "https://images.unsplash.com/photo-1589131008272-392da258814a?w=100&h=100&fit=crop"
+                 "/src/assets/images/regenerated_image_1778676739185.png",
+                 "/src/assets/images/regenerated_image_1778676827261.png",
+                 "/src/assets/images/regenerated_image_1778676830093.png"
                ].map((src, i) => (
                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[#050508] overflow-hidden bg-gray-600 flex items-center justify-center text-[10px] font-bold">
                    <img 
@@ -53,7 +53,7 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
              <div className="h-10 w-px bg-white/10 hidden sm:block"></div>
              <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
               <button 
-                onClick={() => onSelect ? onSelect("complete-future", 33) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => onSelect ? onSelect("complete-future", 9) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
                 className="btn-primary px-10 group relative flex flex-col items-center justify-center py-5 min-w-[240px]"
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -62,15 +62,15 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-white/50 line-through text-xs font-medium">₹125</span>
-                  <span className="text-white text-xl font-black">₹33</span>
+                  <span className="text-white text-xl font-black">₹9</span>
                   <span className="bg-amber-400 text-black text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tight">Today's Deal</span>
                 </div>
               </button>
               <button 
-                onClick={() => document.getElementById('panjika')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById('mini-reports')?.scrollIntoView({ behavior: 'smooth' })}
                 className="px-8 py-5 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 active:scale-95 transition-all text-[10px] sm:text-xs uppercase tracking-widest whitespace-nowrap"
               >
-                  Auspicious Timings
+                  Luck and Muhurat Analysis
               </button>
              </div>
           </div>

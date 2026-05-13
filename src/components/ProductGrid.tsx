@@ -83,7 +83,7 @@ export const ProductGrid = ({ onSelect }: { onSelect: (id: string, price: number
       title: "Complete 2026-2030 Future Prediction Report",
       subtitle: "Our Most Detailed Analysis Yet",
       desc: "An exhaustive 50-page breakdown of your karmic cycles, Mahadasha periods, and planetary transits for the next 5 years. Covers Wealth, Health, Marriage, and Career in forensic detail.",
-      price: 33,
+      price: 9,
       originalPrice: 125,
       features: ["100% Accurate", "Best Seller", "Detailed PDF", "Karma Remedy"],
       icon: <Star className="text-amber-400 w-12 h-12" />
@@ -193,8 +193,8 @@ export const ProductGrid = ({ onSelect }: { onSelect: (id: string, price: number
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
-        <div>
-           <h2 className="text-3xl font-bold text-amber-200">Micro Reports</h2>
+        <div id="mini-reports">
+           <h2 className="text-3xl font-bold text-amber-200">Mini Reports</h2>
            <p className="text-gray-400 mt-2">Personalized insights at pocket-friendly prices.</p>
         </div>
         <span className="text-[10px] text-amber-500 font-bold uppercase tracking-widest bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 mr-2">

@@ -147,7 +147,7 @@ export const ZodiacHoroscope = ({ onSelect }: { onSelect?: (id: string, price: n
 
                       <div className="mt-10 flex flex-wrap gap-4">
                         <button 
-                          onClick={() => onSelect?.("complete-future", 33)}
+                          onClick={() => onSelect?.("complete-future", 9)}
                           className="px-8 py-4 bg-gold text-navy font-bold rounded-2xl flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-gold/20"
                         >
                           Get Full 55-Page Report

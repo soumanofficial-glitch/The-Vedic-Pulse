@@ -175,13 +175,6 @@ export const PaymentFlow = ({
 
             <div className="space-y-4">
               <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center space-y-4">
-                <div className="flex justify-center mb-2">
-                   <div className="flex -space-x-2">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="w-8 h-8 rounded-full border-2 border-slate-900 bg-gray-700" />
-                      ))}
-                   </div>
-                </div>
                 <p className="text-xs text-gray-400 leading-relaxed">
                   Join <span className="text-white font-bold">12,400+ Seekers</span> who unlocked their karmic blueprints today.
                 </p>
