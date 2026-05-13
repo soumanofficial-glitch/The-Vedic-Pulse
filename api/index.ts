@@ -64,6 +64,38 @@ app.post("/api/verify-payment", async (req, res) => {
       .digest("hex");
 
     if (expectedSignature === razorpay_signature) {
+      // Optional: Meta Conversions API (CAPI) Tracking
+      const pixelId = process.env.META_PIXEL_ID;
+      const accessToken = process.env.META_ACCESS_TOKEN;
+      
+      if (pixelId && accessToken) {
+        try {
+          // Fire and forget (don't block the response)
+          fetch(`https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: [{
+                event_name: 'Purchase',
+                event_time: Math.floor(Date.now() / 1000),
+                action_source: 'website',
+                user_data: {
+                  client_ip_address: req.ip,
+                  client_user_agent: req.headers['user-agent'],
+                },
+                custom_data: {
+                  currency: 'INR',
+                  value: 99, // Adjust standard value if needed or pass in body
+                  order_id: razorpay_order_id,
+                },
+              }],
+            }),
+          }).catch(err => console.error("Meta CAPI Error:", err));
+        } catch (e) {
+          console.error("Meta CAPI trigger error:", e);
+        }
+      }
+
       res.json({ success: true, message: "Payment verified successfully" });
     } else {
       res.status(400).json({ success: false, message: "Invalid signature" });

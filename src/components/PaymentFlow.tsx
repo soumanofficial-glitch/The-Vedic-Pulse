@@ -8,6 +8,7 @@ import { httpsCallable } from "firebase/functions";
 declare global {
   interface Window {
     Razorpay: any;
+    fbq: any;
   }
 }
 
@@ -23,11 +24,17 @@ export const PaymentFlow = ({
   const [step, setStep] = useState<"options" | "processing" | "success" | "error">("options");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const upiId = "7003235589@jupiteraxis";
-  const payeeName = "Souman Bera";
-
-  // UPI URL format: upi://pay?pa=address&pn=name&am=amount&cu=currency
-  const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${price}&cu=INR`;
+  
+  useEffect(() => {
+    // Initial tracking for opening the payment modal
+    if (window.fbq) {
+      window.fbq('track', 'InitiateCheckout', {
+        value: price,
+        currency: 'INR',
+        content_name: 'Vedic Predictions Premium Report'
+      });
+    }
+  }, [price]);
 
   const handleRazorpayCheckout = async () => {
     setLoading(true);
@@ -80,6 +87,16 @@ export const PaymentFlow = ({
             const verificationResult = await verificationResponse.json();
 
             if (verificationResult.success) {
+              // Meta Pixel Purchase Event
+              if (window.fbq) {
+                window.fbq('track', 'Purchase', {
+                  value: price,
+                  currency: 'INR',
+                  content_name: 'Vedic Predictions Premium Report',
+                  order_id: response.razorpay_order_id
+                });
+              }
+              
               setStep("success");
               setTimeout(onSuccess, 2000);
             } else {
