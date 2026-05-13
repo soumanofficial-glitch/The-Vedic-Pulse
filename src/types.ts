@@ -15,6 +15,24 @@ export interface AstrologyReport {
   relationshipEnergy: string;
   financialEnergy: string;
   personalizedInsight: string;
+  // Expanded fields for 55+ page equivalent report
+  careerAnalysis: string;
+  healthAnalysis: string;
+  loveAnalysis: string;
+  remedies: string[];
+  mahadashaPeriod: string;
+  shaniSadeSati: string;
+  karmicDuty: string;
+  dailySadhana: string;
+}
+
+export interface DailyHoroscope {
+  prediction: string;
+  loveScore: number;
+  careerScore: number;
+  healthScore: number;
+  luckyNumber: number;
+  luckyColor: string;
 }
 
 export interface PanchangData {

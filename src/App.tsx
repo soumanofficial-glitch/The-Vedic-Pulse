@@ -68,8 +68,8 @@ export default function App() {
       <FloatingToday />
 
       <main>
-        <Hero />
-        <ZodiacHoroscope />
+        <Hero onSelect={handleProductSelect} />
+        <ZodiacHoroscope onSelect={handleProductSelect} />
         <ProductGrid onSelect={handleProductSelect} />
         <PanjikaSection />
         <Testimonials />

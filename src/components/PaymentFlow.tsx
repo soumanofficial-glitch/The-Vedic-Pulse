@@ -63,25 +63,44 @@ export const PaymentFlow = ({
             </div>
             
             <div className="text-center">
-              <h2 className="text-3xl font-bold mb-1 text-white">₹{price}</h2>
-              <p className="text-gray-400 text-xs uppercase tracking-widest font-bold">Total Amount Payable</p>
+              <div className="flex justify-center mb-2">
+                 <span className="bg-amber-500/20 text-amber-500 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-amber-500/20 animate-bounce">
+                   Special Discount Applied
+                 </span>
+              </div>
+              <h2 className="text-4xl font-black mb-1 text-white flex items-center justify-center gap-2">
+                ₹{price}
+                <span className="text-gray-600 text-sm line-through font-medium">₹125</span>
+              </h2>
+              <p className="text-gray-400 text-[10px] uppercase tracking-[0.3em] font-black">Activation Fee</p>
             </div>
 
-            <div className="space-y-4">
-              {/* QR Code Section */}
-              <div className="bg-white p-6 rounded-2xl flex flex-col items-center justify-center border border-white/20 shadow-2xl">
-                 <div className="p-2 border-2 border-gray-100 rounded-xl">
-                   <QRCodeSVG 
-                    value={upiUrl}
-                    size={160}
-                    level="H"
-                    includeMargin={false}
-                   />
-                 </div>
-                 <p className="text-[10px] text-gray-800 mt-4 font-bold uppercase tracking-[0.2em] text-center">
-                   Scan & Pay with UPI
-                 </p>
-              </div>
+              <div className="space-y-4">
+                {/* QR Code Section */}
+                <div className="bg-white p-7 rounded-[2.5rem] flex flex-col items-center justify-center border border-white/20 shadow-[-10px_-10px_30px_rgba(255,255,255,0.05),10px_10px_30px_rgba(0,0,0,0.5)]">
+                   <div className="p-3 bg-gray-50 border-2 border-gray-100 rounded-[2rem]">
+                     <QRCodeSVG 
+                      value={upiUrl}
+                      size={180}
+                      level="H"
+                      includeMargin={false}
+                     />
+                   </div>
+                   <p className="text-[10px] text-gray-900 mt-5 font-black uppercase tracking-[0.3em] text-center">
+                     Scan & Pay ₹{price} for Unlimited Clarity
+                   </p>
+                </div>
+
+                <div className="flex items-center justify-center gap-4 py-2">
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="w-6 h-6 rounded-full border-2 border-slate-900 bg-gray-600 animate-pulse" style={{ animationDelay: `${i * 200}ms` }} />
+                    ))}
+                  </div>
+                  <p className="text-white/40 text-[9px] font-bold uppercase tracking-wider leading-tight">
+                    <span className="text-amber-400">12,400+ Seekers</span> already<br />unlocked their report.
+                  </p>
+                </div>
 
               {/* UPI ID Section */}
               <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
@@ -117,6 +136,15 @@ export const PaymentFlow = ({
                 >
                   Confirm Payment & Activate
                 </button>
+                <div className="flex items-center justify-between pt-6 mt-4 border-t border-white/5">
+                   <div className="flex items-center gap-2 text-white/30 text-[9px] font-black uppercase tracking-widest">
+                     <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                     256-Bit Encrypted
+                   </div>
+                   <div className="text-white/30 text-[9px] font-black uppercase tracking-widest">
+                     Authorized Vedic Portal
+                   </div>
+                </div>
               </form>
             </div>
 

@@ -1,5 +1,5 @@
-import React from "react";
-import { motion } from "motion/react";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   ArrowLeft, 
   Download, 
@@ -8,7 +8,15 @@ import {
   Zap, 
   Heart, 
   CircleDollarSign,
-  Star
+  Star,
+  ShieldCheck,
+  Compass,
+  Briefcase,
+  Activity,
+  Flame,
+  CheckCircle2,
+  Calendar,
+  Layers
 } from "lucide-react";
 import { AstrologyReport, BirthDetails } from "../types";
 
@@ -21,117 +29,253 @@ export const ReportDashboard = ({
   details: BirthDetails;
   onClose: () => void;
 }) => {
+  const [activeTab, setActiveTab] = useState<"overview" | "planetary" | "life" | "remedies">("overview");
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -100 }}
-      className="fixed inset-0 z-[200] bg-cosmic-dark overflow-y-auto pb-20"
+      className="fixed inset-0 z-[200] bg-[#05070a] overflow-y-auto pb-20 selection:bg-gold/30"
     >
-      <div className="max-w-3xl mx-auto p-6 pt-24">
-        <div className="flex items-center justify-between mb-8">
-          <button onClick={onClose} className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors">
-            <ArrowLeft size={20} />
-            <span>Dashboard</span>
+      {/* Premium Header */}
+      <div className="sticky top-0 z-50 bg-[#05070a]/80 backdrop-blur-md border-b border-white/5">
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+          <button onClick={onClose} className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors group">
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="text-xs font-bold uppercase tracking-widest">Exit Portal</span>
           </button>
-          <div className="flex gap-2">
-            <button className="p-2 rounded-full bg-white/5 hover:bg-white/10"><Download size={20} /></button>
-            <button className="p-2 rounded-full bg-white/5 hover:bg-white/10"><Share2 size={20} /></button>
+          
+          <div className="flex items-center gap-4">
+             <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-tighter text-gray-400">Verified System</span>
+             </div>
+             <button className="flex items-center gap-2 px-4 py-2 bg-gold text-navy rounded-full text-xs font-black uppercase tracking-widest hover:bg-white transition-all">
+                <Download size={14} /> Download PDF
+             </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto p-6 pt-12">
+        {/* Report Title Section */}
+        <div className="text-center mb-16">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="flex justify-center mb-6"
+          >
+            <div className="relative w-20 h-20">
+              <div className="absolute inset-0 bg-gold/20 rounded-full blur-2xl animate-pulse" />
+              <div className="relative w-full h-full border border-gold/30 rounded-full flex items-center justify-center bg-white/5 backdrop-blur-xl">
+                <Star className="text-gold w-8 h-8" />
+              </div>
+            </div>
+          </motion.div>
+          <h1 className="font-serif text-5xl md:text-6xl text-white mb-4 italic">The Bhrigu Samhita Analysis</h1>
+          <p className="text-gold/60 font-mono text-sm tracking-[0.4em] uppercase mb-8">Detailed Karmic Blueprint for {details.name}</p>
+          <div className="flex flex-wrap justify-center gap-6 text-[10px] font-black uppercase tracking-widest text-gray-500">
+            <div className="flex items-center gap-2 border-r border-white/10 pr-6"><span>DOB: {details.dob}</span></div>
+            <div className="flex items-center gap-2 border-r border-white/10 pr-6"><span>TOB: {details.tob}</span></div>
+            <div className="flex items-center gap-2"><span>POB: {details.pob}</span></div>
           </div>
         </div>
 
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="glass-card overflow-hidden mb-8 border-white/5 shadow-2xl"
-        >
-          <div className="bg-gradient-to-r from-amber-500/10 to-transparent p-8 border-b border-white/5">
-            <h1 className="font-serif text-3xl italic mb-2 tracking-tight text-amber-100">Cosmic Alignment Report</h1>
-            <p className="text-gray-400 font-medium">Prepared for <span className="text-amber-400">{details.name}</span></p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <span className="badge-amber text-[9px]">Personalized Reading</span>
-              <span className="text-[9px] bg-white/5 border border-white/10 px-2 py-0.5 rounded font-bold uppercase text-gray-400 tracking-tighter">Vedic Insights</span>
-            </div>
-          </div>
-
-          <div className="p-8 space-y-12 bg-white/[0.01]">
-            {/* Top Scores */}
-            <div className="grid grid-cols-2 gap-8">
-              <ScoreGauge label="Luck Score" value={report.luckScore} color="#f59e0b" />
-              <ScoreGauge label="Energy Score" value={report.energyScore} color="#ff4e00" />
-            </div>
-
-            {/* Quick Insights */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <InfoCard icon={<Star className="text-amber-400" />} label="Lucky Number" value={(report.luckyNumber ?? '-').toString()} />
-              <InfoCard icon={<Zap className="text-amber-500" />} label="Lucky Color" value={report.luckyColor || 'Not specified'} />
-              <InfoCard icon={<TrendingUp className="text-cyan-400" />} label="Financial" value={report.financialEnergy || 'N/A'} />
-              <InfoCard icon={<Heart className="text-rose-500" />} label="Relationship" value={report.relationshipEnergy || 'N/A'} />
-            </div>
-
-            {/* Detailed Insight */}
-            <div className="space-y-4">
-               <h3 className="text-[10px] font-bold text-amber-500/50 uppercase tracking-[0.3em]">The Universe Speaks</h3>
-               <div className="glass-card p-8 bg-white/[0.03] border-amber-500/10 leading-relaxed text-gray-200 italic font-serif text-xl shadow-inner">
-                 "{report.personalizedInsight}"
-               </div>
-            </div>
-
-            {/* Favorable Info */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="glass-card p-6 border-cyan-500/10 hover:border-cyan-500/30 transition-colors">
-                <h4 className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <TrendingUp size={12} /> Planetary Alignment
-                </h4>
-                <p className="text-sm text-gray-300 leading-relaxed">{report.planetaryAlignment}</p>
+        {/* Global Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+           <div className="glass-card p-8 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent">
+              <div className="flex justify-between items-start mb-6">
+                <Compass className="text-amber-500 w-6 h-6" />
+                <span className="text-[10px] font-black text-amber-500/50 uppercase tracking-widest">Alignment</span>
               </div>
-              <div className="glass-card p-6 border-amber-500/10 hover:border-amber-500/30 transition-colors">
-                <h4 className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <Star size={12} /> Favorable Muhurat
-                </h4>
-                <p className="text-sm text-gray-300 leading-relaxed font-mono uppercase tracking-tighter">{report.favorableTimings}</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+              <div className="text-4xl font-black text-white mb-2 italic">#{report.luckyNumber}</div>
+              <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">{report.luckyColor} Energy</div>
+           </div>
 
-        <div className="text-center opacity-30 text-[10px] uppercase tracking-[0.3em] font-bold">
-          JyotishGlow Digital Certification • Verified Vedic Logic
+           <div className="glass-card p-8 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent">
+              <div className="flex justify-between items-start mb-6">
+                <Flame className="text-indigo-400 w-6 h-6" />
+                <span className="text-[10px] font-black text-indigo-400/50 uppercase tracking-widest">Luck Quotient</span>
+              </div>
+              <div className="text-4xl font-black text-white mb-2 italic">{report.luckScore}%</div>
+              <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">Auspicious Transit</div>
+           </div>
+
+           <div className="glass-card p-8 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent">
+              <div className="flex justify-between items-start mb-6">
+                <Zap className="text-emerald-400 w-6 h-6" />
+                <span className="text-[10px] font-black text-emerald-400/50 uppercase tracking-widest">Prana Level</span>
+              </div>
+              <div className="text-4xl font-black text-white mb-2 italic">{report.energyScore}%</div>
+              <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">Vitality Index</div>
+           </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="flex flex-wrap gap-2 mb-12 border-b border-white/5 pb-4">
+          {[
+            { id: "overview", label: "Executive Summary", icon: <Star size={14} /> },
+            { id: "planetary", label: "Planetary Transits", icon: <Layers size={14} /> },
+            { id: "life", label: "Life Chapters", icon: <Compass size={14} /> },
+            { id: "remedies", label: "Remedial Sadhana", icon: <ShieldCheck size={14} /> }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                activeTab === tab.id 
+                ? "bg-gold text-navy shadow-[0_0_20px_rgba(251,191,36,0.2)]" 
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Content Area */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-12"
+          >
+            {activeTab === "overview" && (
+              <div className="space-y-12">
+                <Section title="Soul Purpose (Karmic Duty)" icon={<Compass className="text-gold" />}>
+                  <p className="text-xl text-gray-300 font-serif italic border-l-2 border-gold/30 pl-8 leading-relaxed">
+                    {report.karmicDuty}
+                  </p>
+                </Section>
+                
+                <div className="grid md:grid-cols-2 gap-8">
+                  <Section title="Spiritual Insight" variant="mini">
+                    <p className="text-gray-400 leading-relaxed text-sm">{report.personalizedInsight}</p>
+                  </Section>
+                  <Section title="Favorable Muhurats" variant="mini">
+                    <div className="bg-gold/5 p-6 rounded-2xl border border-gold/10">
+                      <p className="text-gold font-mono text-lg tracking-tighter uppercase">{report.favorableTimings}</p>
+                    </div>
+                  </Section>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "planetary" && (
+              <div className="space-y-12">
+                <Section title="Current Mahadasha Influence" icon={<Layers className="text-indigo-400" />}>
+                  <div className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl">
+                     <p className="text-gray-300 leading-relaxed">{report.mahadashaPeriod}</p>
+                  </div>
+                </Section>
+
+                <Section title="Shani Sade Sati Status" icon={<ShieldCheck className="text-rose-500" />}>
+                  <div className="p-8 bg-rose-500/5 border border-rose-500/10 rounded-3xl">
+                     <p className="text-gray-300 leading-relaxed">{report.shaniSadeSati}</p>
+                  </div>
+                </Section>
+
+                <Section title="Planetary Positions" icon={<Star className="text-amber-500" />}>
+                  <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{report.planetaryAlignment}</p>
+                </Section>
+              </div>
+            )}
+
+            {activeTab === "life" && (
+              <div className="space-y-12">
+                <LifeFeature 
+                  title="Career & Wealth Architecture" 
+                  content={report.careerAnalysis} 
+                  subContent={report.financialEnergy}
+                  icon={<Briefcase className="text-cyan-400" />}
+                />
+                <LifeFeature 
+                  title="Love & Relationship Sync" 
+                  content={report.loveAnalysis} 
+                  subContent={report.relationshipEnergy}
+                  icon={<Heart className="text-rose-400" />}
+                />
+                <LifeFeature 
+                  title="Health & Vitality Map" 
+                  content={report.healthAnalysis} 
+                  icon={<Activity className="text-emerald-400" />}
+                />
+              </div>
+            )}
+
+            {activeTab === "remedies" && (
+              <div className="space-y-12">
+                <Section title="Daily Sadhana Protocol" icon={<Flame className="text-orange-500" />}>
+                   <div className="bg-[#0f141e] p-8 rounded-3xl border border-white/5">
+                      <p className="text-gray-300 italic mb-8">"{report.dailySadhana}"</p>
+                      <h4 className="text-xs font-black uppercase tracking-widest text-gold mb-6">Prescribed Remedies (Upayas)</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {report.remedies.map((remedy, i) => (
+                          <div key={i} className="flex gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+                            <CheckCircle2 className="text-emerald-500 shrink-0" size={18} />
+                            <span className="text-sm text-gray-300">{remedy}</span>
+                          </div>
+                        ))}
+                      </div>
+                   </div>
+                </Section>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="mt-24 pt-12 border-t border-white/5 flex flex-col items-center">
+           <div className="flex items-center gap-3 mb-8 opacity-40">
+             <div className="w-10 h-px bg-white/20" />
+             <Star className="text-gold w-4 h-4" />
+             <div className="w-10 h-px bg-white/20" />
+           </div>
+           <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-600 text-center leading-loose">
+             Authentic Vedic Analysis • Certified Jyotish Standards<br />
+             Document Ref: JG-{Math.random().toString(36).substring(7).toUpperCase()}
+           </p>
         </div>
       </div>
     </motion.div>
   );
 };
 
-const ScoreGauge = ({ label, value, color }: { label: string; value: number; color: string }) => (
-  <div className="flex flex-col items-center gap-4">
-    <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center">
-      <svg className="w-full h-full -rotate-90">
-        <circle cx="50%" cy="50%" r="45%" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
-        <motion.circle 
-          cx="50%" cy="50%" r="45%" 
-          fill="none" 
-          stroke={color} 
-          strokeWidth="6"
-          strokeDasharray="100 100"
-          initial={{ strokeDashoffset: 100 }}
-          animate={{ strokeDashoffset: 100 - value }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          strokeLinecap="round"
-        />
-      </svg>
-      <div className="absolute flex flex-col items-center">
-        <span className="text-2xl sm:text-3xl font-bold">{value}</span>
-      </div>
-    </div>
-    <span className="text-xs font-bold uppercase tracking-widest text-gray-500">{label}</span>
+const Section = ({ title, children, icon, variant = "full" }: { title: string; children: React.ReactNode; icon?: React.ReactNode; variant?: "full" | "mini" }) => (
+  <div className="space-y-6">
+    <h3 className={`font-black uppercase tracking-[0.2em] flex items-center gap-3 ${variant === "mini" ? "text-[10px] text-gray-500" : "text-xs text-gold"}`}>
+      {icon} {title}
+    </h3>
+    {children}
   </div>
 );
 
-const InfoCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="glass-card p-4 flex flex-col items-center gap-2 text-center">
-    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">{icon}</div>
-    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{label}</div>
-    <div className="text-sm font-semibold">{value}</div>
+const LifeFeature = ({ title, content, subContent, icon }: { title: string; content: string; subContent?: string; icon: React.ReactNode }) => (
+  <div className="glass-card p-8 md:p-12 relative overflow-hidden group">
+    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+       {React.cloneElement(icon as React.ReactElement, { size: 120 })}
+    </div>
+    <div className="relative z-10">
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 italic">
+          {icon}
+        </div>
+        <h3 className="text-2xl font-serif text-white italic">{title}</h3>
+      </div>
+      <div className="space-y-6">
+        <p className="text-gray-400 leading-relaxed text-lg italic font-serif">
+          {content}
+        </p>
+        {subContent && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/5">
+             <CheckCircle2 size={12} className="text-gold" />
+             <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">{subContent}</span>
+          </div>
+        )}
+      </div>
+    </div>
   </div>
 );
+

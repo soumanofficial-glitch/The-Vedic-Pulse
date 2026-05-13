@@ -30,7 +30,7 @@ const CATEGORIES: { label: MuhuratCategory; icon: any }[] = [
 
 export const PanjikaSection = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const [currentYear] = useState(2026);
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedCategory, setSelectedCategory] = useState<MuhuratCategory | "All">("All");
   const [selectedDate, setSelectedDate] = useState<PanchangData | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,17 +48,20 @@ export const PanjikaSection = () => {
 
   const daysInMonth = useMemo(() => {
     const days = new Date(currentYear, currentMonth + 1, 0).getDate();
-    return Array.from({ length: days }, (_, i) => {
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    
+    const monthDays = Array.from({ length: days }, (_, i) => {
       const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(i + 1).padStart(2, "0")}`;
       return getPanchangForDate(dateStr);
     });
+
+    return { monthDays, padding: Array(firstDayOfMonth).fill(null) };
   }, [currentMonth, currentYear]);
 
   const filteredDays = useMemo(() => {
-    return daysInMonth.map(day => {
+    return daysInMonth.monthDays.map(day => {
       const matchesCategory = selectedCategory === "All" || day.bestFor.includes(selectedCategory);
       
-      // Intelligent Search: checks category, tithi, nakshatra, and even score-based keywords
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch = searchQuery === "" || 
         day.bestFor.some(cat => cat.toLowerCase().includes(searchLower)) ||
@@ -71,8 +74,25 @@ export const PanjikaSection = () => {
     });
   }, [daysInMonth, selectedCategory, searchQuery]);
 
-  const handlePrevMonth = () => setCurrentMonth(prev => (prev === 0 ? 11 : prev - 1));
-  const handleNextMonth = () => setCurrentMonth(prev => (prev === 11 ? 0 : prev + 1));
+  const handlePrevMonth = () => {
+    setCurrentMonth(prev => {
+      if (prev === 0) {
+        setCurrentYear(y => y - 1);
+        return 11;
+      }
+      return prev - 1;
+    });
+  };
+  
+  const handleNextMonth = () => {
+    setCurrentMonth(prev => {
+      if (prev === 11) {
+        setCurrentYear(y => y + 1);
+        return 0;
+      }
+      return prev + 1;
+    });
+  };
 
   return (
     <section id="panjika" className="relative py-24 px-4 overflow-hidden bg-[#020617]">
@@ -186,11 +206,14 @@ export const PanjikaSection = () => {
           </div>
 
           {/* Grid Layout */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 border-collapse">
+          <div className="grid grid-cols-7 border-collapse">
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => (
               <div key={d} className="p-4 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 border-b border-r border-white/5 bg-white/[0.01]">
                 {d}
               </div>
+            ))}
+            {daysInMonth.padding.map((_, idx) => (
+              <div key={`padding-${idx}`} className="min-h-[140px] border-b border-r border-white/5 bg-white/[0.01]" />
             ))}
             {filteredDays.map((day, idx) => {
               const isHighlyAuspicious = day.auspiciousScore >= 90;
@@ -344,7 +367,9 @@ const MuhuratModal = ({ data, onClose }: { data: PanchangData; onClose: () => vo
                             <CalendarIcon className="w-6 h-6" />
                             <span className="font-mono text-sm tracking-widest font-bold">SACRED DATE</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-serif text-white mb-2">{data.date.split('-')[2]} Nov 2026</h2>
+                        <h2 className="text-4xl md:text-5xl font-serif text-white mb-2">
+                          {data.date.split('-')[2]} {getMonthNames()[parseInt(data.date.split('-')[1]) - 1]} {data.date.split('-')[0]}
+                        </h2>
                         <p className="text-xl text-gold font-serif italic mb-8">{data.day}</p>
                         
                         <div className="p-8 bg-white/5 rounded-[2rem] border border-white/5 text-center">
@@ -439,7 +464,10 @@ const DataCard = ({ label, value }: { label: string; value: string }) => (
 );
 
 export const FloatingToday = () => {
-    const today = useMemo(() => getPanchangForDate(new Date().toISOString().split('T')[0]), []);
+    const todayDate = new Date();
+    const dateStr = todayDate.toISOString().split('T')[0];
+    const today = useMemo(() => getPanchangForDate(dateStr), [dateStr]);
+    const monthNames = getMonthNames();
     
     return (
         <motion.div
@@ -452,17 +480,19 @@ export const FloatingToday = () => {
                      <span className="text-[10px] font-bold text-gold uppercase tracking-tighter">Cosmic Pulse</span>
                      <div className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
                 </div>
-                <div className="text-xs text-gray-400 mb-1">Today: 12 May 2026</div>
-                <div className="text-lg font-serif text-white mb-4">Pushya Nakshatra</div>
+                <div className="text-xs text-gray-400 mb-1">
+                  Today: {todayDate.getDate()} {monthNames[todayDate.getMonth()]} {todayDate.getFullYear()}
+                </div>
+                <div className="text-lg font-serif text-white mb-4">{today.nakshatra} Nakshatra</div>
                 
                 <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-[10px] uppercase font-bold text-gray-500">
-                        <span>Abhijit Muhurat:</span>
-                        <span className="text-gold">11:30 AM</span>
+                        <span>Tithi:</span>
+                        <span className="text-gold">{today.tithi.split(' ').slice(2).join(' ')}</span>
                     </div>
                     <div className="flex justify-between text-[10px] uppercase font-bold text-gray-500">
                         <span>Rahu Kaal:</span>
-                        <span className="text-red-500">04:00 PM</span>
+                        <span className="text-red-500">{today.rahuKaal}</span>
                     </div>
                 </div>
 

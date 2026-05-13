@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { ShieldCheck, Star, Users, Zap } from "lucide-react";
 
-export const Hero = () => {
+export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => void }) => {
   return (
     <section className="relative pt-40 pb-20 px-6 overflow-hidden min-h-screen flex flex-col items-center justify-center">
       <motion.div
@@ -44,10 +44,18 @@ export const Hero = () => {
              <div className="h-10 w-px bg-white/10 hidden sm:block"></div>
              <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
               <button 
-                onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-                className="btn-primary px-10"
+                onClick={() => onSelect ? onSelect("complete-future", 33) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+                className="btn-primary px-10 group relative flex flex-col items-center justify-center py-5 min-w-[240px]"
               >
-                  Get My Report
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap className="w-4 h-4 text-white fill-current animate-pulse" />
+                  <span className="text-sm font-black uppercase tracking-wider">Get My Future Prediction</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-white/50 line-through text-xs font-medium">₹125</span>
+                  <span className="text-white text-xl font-black">₹33</span>
+                  <span className="bg-amber-400 text-black text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tight">Today's Deal</span>
+                </div>
               </button>
               <button 
                 onClick={() => document.getElementById('panjika')?.scrollIntoView({ behavior: 'smooth' })}
