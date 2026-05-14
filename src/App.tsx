@@ -15,6 +15,7 @@ import { ReportDashboard } from "./components/ReportDashboard";
 import { PanjikaSection, FloatingToday } from "./components/panjika/PanjikaSection";
 import { ZodiacHoroscope } from "./components/ZodiacHoroscope";
 import { Testimonials } from "./components/Testimonials";
+import { FAQ } from "./components/FAQ";
 import { Footer } from "./components/Footer";
 import { generateAstrologyReport } from "./services/aiAstrologyService";
 import { BirthDetails, AstrologyReport } from "./types";
@@ -30,6 +31,45 @@ export default function App() {
 
   useEffect(() => {
     trackMetaEvent("PageView");
+
+    // Handle shared reports
+    const params = new URLSearchParams(window.location.search);
+    const sharedId = params.get("shared");
+    
+    if (sharedId) {
+      const loadSharedReport = async () => {
+        setIsLoading(true);
+        try {
+          const { doc, getDoc } = await import("firebase/firestore");
+          const { db } = await import("./lib/firebase");
+          
+          const docSnap = await getDoc(doc(db, "shared_reports", sharedId));
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setReport(data.reportData);
+            setUserDetails(data.birthDetails);
+            
+            // Clean up URL without refreshing
+            const url = new URL(window.location.href);
+            url.searchParams.delete("shared");
+            window.history.replaceState({}, "", url);
+          } else {
+            console.error("No such report!");
+            window.alert("The shared report you are looking for was not found.");
+            // Clean up URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete("shared");
+            window.history.replaceState({}, "", url);
+          }
+        } catch (error) {
+          console.error("Error loading shared report:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      loadSharedReport();
+    }
   }, []);
 
   const handleProductSelect = (id: string, price: number) => {
@@ -84,6 +124,7 @@ export default function App() {
         <ZodiacHoroscope onSelect={handleProductSelect} />
         <ProductGrid onSelect={handleProductSelect} />
         <PanjikaSection />
+        <FAQ />
         <Testimonials />
       </main>
 

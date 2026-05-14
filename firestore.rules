@@ -1,6 +1,13 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /shared_reports/{reportId} {
+      allow get: if true;
+      allow create: if request.resource.data.keys().hasAll(['reportData', 'birthDetails', 'createdAt'])
+                    && request.resource.data.reportData is map
+                    && request.resource.data.birthDetails is map
+                    && request.resource.data.createdAt == request.time;
+    }
     match /{document=**} {
       allow read, write: if false;
     }

@@ -16,7 +16,7 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
           <div className="space-y-4">
              <span className="badge-amber">Instant Vedic Insights</span>
              <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight bg-gradient-to-b from-white via-white to-gray-500 bg-clip-text text-transparent">
-               Discover Your <br/> Daily <span className="text-amber-400">Luck & Muhurat</span>
+               Complete 2026-2030 <br/> <span className="text-amber-400">Future Prediction Report</span>
              </h1>
              <p className="text-gray-400 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
                Personalized Vedic insights based on your birth details, planetary positions, and numerology.

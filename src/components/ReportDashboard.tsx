@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../lib/firebase";
 import { 
   ArrowLeft, 
   Download, 
@@ -33,7 +35,64 @@ export const ReportDashboard = ({
 }) => {
   const [activeTab, setActiveTab] = useState<"overview" | "planetary" | "life" | "remedies">("overview");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [shareStatus, setShareStatus] = useState<"idle" | "sharing" | "shared">("idle");
+  const [shareUrl, setShareUrl] = useState<string>("");
   const reportRef = React.useRef<HTMLDivElement>(null);
+
+  const handleShare = async () => {
+    if (shareStatus === "sharing") return;
+    
+    // If already shared, just use the URL
+    if (shareUrl) {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `Karmic Blueprint for ${details.name}`,
+            text: `Check out my Vedic Astrology Report from JyotishGlow!`,
+            url: shareUrl,
+          });
+          return;
+        } catch (err) {
+          console.log("Share failed", err);
+        }
+      }
+      
+      // Fallback: Copy to clipboard
+      await navigator.clipboard.writeText(shareUrl);
+      return;
+    }
+
+    setShareStatus("sharing");
+    try {
+      const docRef = await addDoc(collection(db, "shared_reports"), {
+        reportData: report,
+        birthDetails: details,
+        createdAt: serverTimestamp(),
+      });
+      
+      const newShareUrl = `${window.location.origin}?shared=${docRef.id}`;
+      setShareUrl(newShareUrl);
+      setShareStatus("shared");
+      
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `Karmic Blueprint for ${details.name}`,
+            text: `Check out my Vedic Astrology Report from JyotishGlow!`,
+            url: newShareUrl,
+          });
+        } catch (err) {
+          console.log("Native share failed, maybe cancelled", err);
+          await navigator.clipboard.writeText(newShareUrl);
+        }
+      } else {
+        await navigator.clipboard.writeText(newShareUrl);
+      }
+    } catch (err) {
+      console.error("Sharing failed", err);
+      setShareStatus("idle");
+    }
+  };
 
   const handleDownloadPDF = async () => {
     if (isGenerating) return;
@@ -107,6 +166,25 @@ export const ReportDashboard = ({
                   <Download size={14} />
                 )} 
                 {isGenerating ? "Preparing..." : "Download PDF"}
+             </button>
+
+             <button 
+                onClick={handleShare}
+                disabled={shareStatus === "sharing"}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${
+                  shareStatus === "shared" 
+                  ? "bg-emerald-500 text-white" 
+                  : "bg-white/10 text-white hover:bg-white/20"
+                } disabled:opacity-50`}
+              >
+                {shareStatus === "sharing" ? (
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : shareStatus === "shared" ? (
+                  <CheckCircle2 size={14} />
+                ) : (
+                  <Share2 size={14} />
+                )}
+                {shareStatus === "sharing" ? "Saving..." : shareStatus === "shared" ? "Link Copied" : "Share"}
              </button>
           </div>
         </div>
