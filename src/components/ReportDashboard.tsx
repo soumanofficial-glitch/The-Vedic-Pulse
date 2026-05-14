@@ -48,7 +48,7 @@ export const ReportDashboard = ({
         try {
           await navigator.share({
             title: `Karmic Blueprint for ${details.name}`,
-            text: `Check out my Vedic Astrology Report from JyotishGlow!`,
+            text: `Check out my Vedic Astrology Report from The Vedic Pulse!`,
             url: shareUrl,
           });
           return;
@@ -78,7 +78,7 @@ export const ReportDashboard = ({
         try {
           await navigator.share({
             title: `Karmic Blueprint for ${details.name}`,
-            text: `Check out my Vedic Astrology Report from JyotishGlow!`,
+            text: `Check out my Vedic Astrology Report from The Vedic Pulse!`,
             url: newShareUrl,
           });
         } catch (err) {

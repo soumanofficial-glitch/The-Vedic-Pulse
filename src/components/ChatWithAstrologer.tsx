@@ -119,7 +119,7 @@ export const ChatWithAstrologer = () => {
         - Never give definitive medical or legal advice; suggest professionals for those while providing spiritual context.
         - If the user uses Hinglish, you respond in Hinglish or English as per the flow.
         
-        Context: You are the lead astrologer for 'JyotishGlow', a trusted platform for millions.
+        Context: You are the lead astrologer for 'The Vedic Pulse', a trusted platform for millions.
       `;
 
       const history = messages.map(msg => ({

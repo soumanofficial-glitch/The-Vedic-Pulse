@@ -71,7 +71,7 @@ export const PaymentFlow = ({
         key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_SoobLWVqBYsa0K",
         amount: order.amount,
         currency: order.currency,
-        name: "JyotishGlow",
+        name: "The Vedic Pulse",
         description: "Vedic Predictions Premium Report",
         order_id: order.id,
         handler: async (response: any) => {
