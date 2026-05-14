@@ -23,6 +23,35 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
              </p>
           </div>
 
+          <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+            <button 
+              onClick={() => onSelect ? onSelect("present-life", 3) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-6 py-5 bg-amber-500 text-black font-black rounded-2xl hover:bg-white active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(245,158,11,0.4)] group"
+            >
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Sparkles className="w-3.5 h-3.5 fill-current animate-pulse text-black" />
+                <span>Present Life Reading</span>
+              </div>
+              <div className="flex items-center gap-2">
+                 <span className="opacity-40 line-through text-[10px]">₹29</span>
+                 <span className="text-lg">₹3 Only</span>
+              </div>
+            </button>
+            <button 
+              onClick={() => onSelect ? onSelect("complete-future", 9) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-6 py-5 bg-white text-black font-black rounded-2xl hover:bg-amber-400 active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(255,255,255,0.2)] group"
+            >
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Zap className="w-3.5 h-3.5 fill-current animate-pulse text-amber-600" />
+                <span>2026-2030 Future Report</span>
+              </div>
+              <div className="flex items-center gap-2">
+                 <span className="opacity-40 line-through text-[10px]">₹125</span>
+                 <span className="text-lg">₹9 Only</span>
+              </div>
+            </button>
+          </div>
+
           <div className="grid grid-cols-3 gap-4">
             <StepCard step="01" label="Enter Details" />
             <StepCard step="02" label="AI Analysis" />
@@ -51,40 +80,12 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
                Trusted by 1.2M+ Seekers
              </div>
              <div className="h-10 w-px bg-white/10 hidden sm:block"></div>
-             <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-               <button 
-                 onClick={() => onSelect ? onSelect("present-life", 3) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-                 className="px-6 py-5 bg-amber-500 text-black font-black rounded-2xl hover:bg-white active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(245,158,11,0.4)] group"
-               >
-                 <div className="flex items-center gap-1.5 mb-0.5">
-                   <Sparkles className="w-3.5 h-3.5 fill-current animate-pulse text-black" />
-                   <span>Present Life Reading</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <span className="opacity-40 line-through text-[10px]">₹29</span>
-                    <span className="text-lg">₹3 Only</span>
-                 </div>
-               </button>
-               <button 
-                 onClick={() => onSelect ? onSelect("complete-future", 9) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-                 className="px-6 py-5 bg-white text-black font-black rounded-2xl hover:bg-amber-400 active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(255,255,255,0.2)] group"
-               >
-                 <div className="flex items-center gap-1.5 mb-0.5">
-                   <Zap className="w-3.5 h-3.5 fill-current animate-pulse text-amber-600" />
-                   <span>2026-2030 Future Report</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <span className="opacity-40 line-through text-[10px]">₹125</span>
-                    <span className="text-lg">₹9 Only</span>
-                 </div>
-               </button>
-              <button 
-                onClick={() => document.getElementById('mini-reports')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-8 py-5 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 active:scale-95 transition-all text-[10px] sm:text-xs uppercase tracking-widest whitespace-nowrap"
-              >
-                  Luck and Muhurat Analysis
-              </button>
-             </div>
+             <button 
+              onClick={() => document.getElementById('mini-reports')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-6 py-4 bg-white/5 border border-white/10 text-white text-[10px] uppercase font-bold rounded-xl hover:bg-white/10 transition-all tracking-widest"
+            >
+                More Mini Reports
+            </button>
           </div>
         </div>
 
