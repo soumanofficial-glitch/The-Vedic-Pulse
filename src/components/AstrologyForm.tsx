@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, MapPin, Calendar, Clock, User } from "lucide-react";
 import { BirthDetails } from "../types";
+import { trackMetaEvent } from "../lib/metaTracking";
 
 export const AstrologyForm = ({ 
   onClose, 
@@ -42,6 +43,12 @@ export const AstrologyForm = ({
 
         <form className="space-y-6" onSubmit={(e) => {
           e.preventDefault();
+          trackMetaEvent("InitiateCheckout", {
+            em: formData.name, // Not actually an email, but we use it as name search data
+          }, {
+            content_ids: [productId],
+            content_type: "product"
+          });
           onSubmit(formData);
         }}>
           <div className="space-y-4">

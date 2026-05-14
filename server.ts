@@ -35,6 +35,87 @@ async function startServer() {
     key_secret: process.env.RAZORPAY_KEY_SECRET || "",
   });
 
+  // Meta CAPI Helper
+  const hash = (val: any) => {
+    if (!val) return null;
+    const clean = String(val).trim().toLowerCase();
+    // Return SHA256 hashed value as recommended by Meta
+    return crypto.createHash("sha256").update(clean).digest("hex");
+  };
+
+  const getFBCookie = (req: express.Request, name: string) => {
+    const cookies = req.headers.cookie || "";
+    const match = cookies.match(new RegExp("(^| )" + name + "=([^;]+)"));
+    return match ? match[2] : null;
+  };
+
+  const sendMetaEvent = async (eventName: string, userData: any, customData: any = {}, req: express.Request) => {
+    const pixelId = process.env.META_PIXEL_ID;
+    const accessToken = process.env.META_ACCESS_TOKEN;
+
+    if (!pixelId || !accessToken) {
+      console.warn("[META] Pixel ID or Access Token missing. Skipping event:", eventName);
+      return;
+    }
+
+    try {
+      // Process user data - hash sensitive info if raw values are provided
+      const processedUserData: any = {
+        client_ip_address: req.ip,
+        client_user_agent: req.headers["user-agent"],
+        fbc: getFBCookie(req, "_fbc"),
+        fbp: getFBCookie(req, "_fbp"),
+        ...userData,
+      };
+
+      // Auto-hash common fields if they are in the root of userData
+      if (processedUserData.em && !processedUserData.em.includes("@") === false) {
+        processedUserData.em = [hash(processedUserData.em)];
+      }
+      if (processedUserData.ph && isNaN(Number(processedUserData.ph)) === false) {
+        processedUserData.ph = [hash(processedUserData.ph)];
+      }
+
+      const payload = {
+        data: [{
+          event_name: eventName,
+          event_time: Math.floor(Date.now() / 1000),
+          action_source: "website",
+          event_source_url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
+          user_data: processedUserData,
+          custom_data: customData,
+        }],
+      };
+
+      console.log(`[META] Sending event: ${eventName}`);
+
+      const response = await fetch(`https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        console.error("[META] API Error Response:", result);
+      }
+    } catch (error) {
+      console.error("[META] Request failed:", error);
+    }
+  };
+
+  // Generic Tracking Endpoint
+  app.post("/api/track", async (req, res) => {
+    const { eventName, userData = {}, customData = {} } = req.body;
+    if (!eventName) {
+      return res.status(400).json({ error: "eventName is required" });
+    }
+    
+    // We run tracking in background to not block response
+    sendMetaEvent(eventName, userData, customData, req);
+    res.json({ status: "queued" });
+  });
+
   // Health check
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", time: new Date().toISOString() });
@@ -101,37 +182,12 @@ async function startServer() {
         .digest("hex");
 
       if (expectedSignature === razorpay_signature) {
-        // Optional: Meta Conversions API (CAPI) Tracking
-        const pixelId = process.env.META_PIXEL_ID;
-        const accessToken = process.env.META_ACCESS_TOKEN;
-        
-        if (pixelId && accessToken) {
-          try {
-            // Using global fetch (available in Node 18+)
-            fetch(`https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                data: [{
-                  event_name: 'Purchase',
-                  event_time: Math.floor(Date.now() / 1000),
-                  action_source: 'website',
-                  user_data: {
-                    client_ip_address: req.ip,
-                    client_user_agent: req.headers['user-agent'],
-                  },
-                  custom_data: {
-                    currency: 'INR',
-                    value: 99, 
-                    order_id: razorpay_order_id,
-                  },
-                }],
-              }),
-            }).catch(err => console.error("[META] CAPI Error:", err));
-          } catch (e) {
-            console.error("[META] CAPI trigger error:", e);
-          }
-        }
+        // Meta Conversions API (CAPI) Tracking
+        sendMetaEvent("Purchase", {}, {
+          currency: "INR",
+          value: 9, // Updated price from previous turn
+          order_id: razorpay_order_id,
+        }, req);
 
         res.json({ success: true, message: "Payment verified successfully" });
       } else {

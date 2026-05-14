@@ -18,6 +18,8 @@ import { Testimonials } from "./components/Testimonials";
 import { Footer } from "./components/Footer";
 import { generateAstrologyReport } from "./services/aiAstrologyService";
 import { BirthDetails, AstrologyReport } from "./types";
+import { trackMetaEvent } from "./lib/metaTracking";
+import { useEffect } from "react";
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<{ id: string; price: number } | null>(null);
@@ -26,8 +28,18 @@ export default function App() {
   const [report, setReport] = useState<AstrologyReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    trackMetaEvent("PageView");
+  }, []);
+
   const handleProductSelect = (id: string, price: number) => {
     setSelectedProduct({ id, price });
+    trackMetaEvent("AddToCart", {}, {
+      content_ids: [id],
+      content_type: "product",
+      value: price,
+      currency: "INR"
+    });
   };
 
   const handleFormSubmit = (details: BirthDetails) => {
