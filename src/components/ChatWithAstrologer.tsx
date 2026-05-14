@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { MessageCircle, X, Send, User, Sparkles, Clock, Lock, CreditCard, ChevronDown, Award, ShieldCheck, Users, Star, BookOpen, CheckCircle, Heart, Zap, Volume2, VolumeX } from "lucide-react";
 import { GoogleGenAI } from "@google/genai";
 // Using a high-quality, realistic portrait of a wise elderly Indian man for the astrologer
-const astrologerImg = "https://images.unsplash.com/photo-1590050752117-23a9d7fc7abc?q=80&w=600&auto=format&fit=crop&crop=faces";
+const astrologerImg = "https://images.unsplash.com/photo-1601054704854-1a2e79dac4d3?q=80&w=800&auto=format&fit=crop";
 
 // Initialize Gemini
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -33,6 +33,7 @@ export const ChatWithAstrologer = () => {
   const [isPaymentRequired, setIsPaymentRequired] = useState(false);
   const [showFullProfile, setShowFullProfile] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [imgError, setImgError] = useState(false);
   const [soundVibe, setSoundVibe] = useState<"meditative" | "mantra" | "nature">("meditative");
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -395,12 +396,17 @@ export const ChatWithAstrologer = () => {
                 <div className="flex items-center gap-4 relative z-10">
                   <div className="relative">
                     <div className="w-14 h-14 bg-gradient-to-tr from-amber-600 via-amber-400 to-amber-200 rounded-full flex items-center justify-center p-1 shadow-2xl shadow-amber-500/30">
-                      <div className="w-full h-full rounded-full overflow-hidden border border-[#0c0c14]">
-                        <img 
-                          src={astrologerImg} 
-                          alt="Acharya Shivanand"
-                          className="w-full h-full object-cover scale-110"
-                        />
+                      <div className="w-full h-full rounded-full overflow-hidden border border-[#0c0c14] flex items-center justify-center bg-amber-500/10">
+                        {imgError ? (
+                          <User className="w-8 h-8 text-amber-500" />
+                        ) : (
+                          <img 
+                            src={astrologerImg} 
+                            alt="Acharya Shivanand"
+                            className="w-full h-full object-cover scale-110"
+                            onError={() => setImgError(true)}
+                          />
+                        )}
                       </div>
                     </div>
                     <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-[#0c0c14] rounded-full animate-pulse shadow-lg" />
@@ -489,12 +495,17 @@ export const ChatWithAstrologer = () => {
                     <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
                       {/* Hero Info */}
                       <div className="text-center">
-                        <div className="w-32 h-32 mx-auto rounded-[2.5rem] overflow-hidden border-4 border-amber-500/20 shadow-2xl mb-4 p-1">
-                          <img 
-                            src={astrologerImg} 
-                            alt="Acharya Shivanand"
-                            className="w-full h-full object-cover rounded-[2rem]"
-                          />
+                        <div className="w-32 h-32 mx-auto rounded-[2.5rem] overflow-hidden border-4 border-amber-500/20 shadow-2xl mb-4 p-1 flex items-center justify-center bg-amber-500/5">
+                          {imgError ? (
+                            <User className="w-16 h-16 text-amber-500" />
+                          ) : (
+                            <img 
+                              src={astrologerImg} 
+                              alt="Acharya Shivanand"
+                              className="w-full h-full object-cover rounded-[2rem]"
+                              onError={() => setImgError(true)}
+                            />
+                          )}
                         </div>
                         <h4 className="text-2xl font-black text-white mb-1">Acharya Shivanand</h4>
                         <p className="text-amber-500 font-bold text-xs uppercase tracking-[0.3em]">Vedanta Sahitya Acharya</p>
@@ -729,12 +740,17 @@ export const ChatWithAstrologer = () => {
                       
                       <div className="bg-gradient-to-br from-amber-500/20 via-transparent to-transparent p-6 flex flex-col sm:flex-row gap-6">
                         <div className="relative group mx-auto sm:mx-0">
-                          <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-amber-500/30 shadow-xl relative z-10">
-                            <img 
-                              src={astrologerImg} 
-                              alt="Acharya Shivanand"
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
+                          <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-amber-500/30 shadow-xl relative z-10 flex items-center justify-center bg-amber-500/5">
+                            {imgError ? (
+                              <User className="w-12 h-12 text-amber-500" />
+                            ) : (
+                              <img 
+                                src={astrologerImg} 
+                                alt="Acharya Shivanand"
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                onError={() => setImgError(true)}
+                              />
+                            )}
                           </div>
                           <div className="absolute -inset-2 bg-amber-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
                         </div>
