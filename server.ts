@@ -61,20 +61,39 @@ async function startServer() {
     try {
       // Process user data - hash sensitive info if raw values are provided
       const processedUserData: any = {
-        client_ip_address: req.ip,
+        client_ip_address: req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress,
         client_user_agent: req.headers["user-agent"],
         fbc: getFBCookie(req, "_fbc"),
         fbp: getFBCookie(req, "_fbp"),
-        ...userData,
       };
 
-      // Auto-hash common fields if they are in the root of userData
-      if (processedUserData.em && !processedUserData.em.includes("@") === false) {
-        processedUserData.em = [hash(processedUserData.em)];
-      }
-      if (processedUserData.ph && isNaN(Number(processedUserData.ph)) === false) {
-        processedUserData.ph = [hash(processedUserData.ph)];
-      }
+      // Fields that MUST be hashed according to Meta CAPI
+      const fieldsToHash = ["em", "ph", "fn", "ln", "ge", "db", "ct", "st", "zp", "country", "external_id"];
+      
+      // Copy other fields from userData and hash if needed
+      Object.keys(userData).forEach(key => {
+        const val = userData[key];
+        if (!val) return;
+
+        if (fieldsToHash.includes(key)) {
+          // If it's already an array, hash each element
+          if (Array.isArray(val)) {
+            processedUserData[key] = val.map(v => {
+              const s = String(v);
+              // Avoid double hashing if it looks like a SHA256
+              return (s.length === 64 && /^[0-9a-f]+$/i.test(s)) ? s : hash(s);
+            });
+          } else {
+            const s = String(val);
+            // Avoid double hashing
+            const hashedVal = (s.length === 64 && /^[0-9a-f]+$/i.test(s)) ? s : hash(s);
+            processedUserData[key] = [hashedVal];
+          }
+        } else {
+          // Pass through non-hashed fields (like client_ip_address, fbp, etc. if provided in userData)
+          processedUserData[key] = val;
+        }
+      });
 
       const payload = {
         data: [{
@@ -162,7 +181,7 @@ async function startServer() {
   // Verify Razorpay Signature
   app.post("/api/verify-payment", async (req, res) => {
     try {
-      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userData = {} } = req.body;
       
       console.log(`[PAYMENT] Verifying payment for order: ${razorpay_order_id}`);
 
@@ -183,7 +202,7 @@ async function startServer() {
 
       if (expectedSignature === razorpay_signature) {
         // Meta Conversions API (CAPI) Tracking
-        sendMetaEvent("Purchase", {}, {
+        sendMetaEvent("Purchase", userData, {
           currency: "INR",
           value: 9, // Updated price from previous turn
           order_id: razorpay_order_id,

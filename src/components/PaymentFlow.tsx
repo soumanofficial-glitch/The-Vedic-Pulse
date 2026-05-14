@@ -5,6 +5,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { functions } from "../lib/firebase";
 import { httpsCallable } from "firebase/functions";
 
+import { BirthDetails } from "../types";
+
 declare global {
   interface Window {
     Razorpay: any;
@@ -14,10 +16,12 @@ declare global {
 
 export const PaymentFlow = ({ 
   price, 
+  userDetails,
   onSuccess, 
   onClose 
 }: { 
   price: number; 
+  userDetails: BirthDetails;
   onSuccess: () => void;
   onClose: () => void;
 }) => {
@@ -81,6 +85,11 @@ export const PaymentFlow = ({
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
+                userData: {
+                  fn: userDetails.name.trim().split(/\s+/)[0],
+                  ln: userDetails.name.trim().split(/\s+/).slice(1).join(" ") || "",
+                  db: userDetails.dob.replace(/-/g, ""), // Meta expects YYYYMMDD
+                }
               }),
             });
 

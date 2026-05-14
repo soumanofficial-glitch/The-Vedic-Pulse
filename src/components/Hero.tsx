@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "motion/react";
-import { ShieldCheck, Star, Users, Zap } from "lucide-react";
+import { ShieldCheck, Star, Users, Zap, Sparkles } from "lucide-react";
 
 export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => void }) => {
   return (
@@ -52,20 +52,32 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
              </div>
              <div className="h-10 w-px bg-white/10 hidden sm:block"></div>
              <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-              <button 
-                onClick={() => onSelect ? onSelect("complete-future", 9) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-                className="btn-primary px-10 group relative flex flex-col items-center justify-center py-5 min-w-[240px]"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <Zap className="w-4 h-4 text-white fill-current animate-pulse" />
-                  <span className="text-sm font-black uppercase tracking-wider">Get My Future Prediction</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-white/50 line-through text-xs font-medium">₹125</span>
-                  <span className="text-white text-xl font-black">₹9</span>
-                  <span className="bg-amber-400 text-black text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tight">Today's Deal</span>
-                </div>
-              </button>
+               <button 
+                 onClick={() => onSelect ? onSelect("present-life", 3) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+                 className="px-6 py-5 bg-amber-500 text-black font-black rounded-2xl hover:bg-white active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(245,158,11,0.4)] group"
+               >
+                 <div className="flex items-center gap-1.5 mb-0.5">
+                   <Sparkles className="w-3.5 h-3.5 fill-current animate-pulse text-black" />
+                   <span>Present Life Reading</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                    <span className="opacity-40 line-through text-[10px]">₹29</span>
+                    <span className="text-lg">₹3 Only</span>
+                 </div>
+               </button>
+               <button 
+                 onClick={() => onSelect ? onSelect("complete-future", 9) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+                 className="px-6 py-5 bg-white text-black font-black rounded-2xl hover:bg-amber-400 active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(255,255,255,0.2)] group"
+               >
+                 <div className="flex items-center gap-1.5 mb-0.5">
+                   <Zap className="w-3.5 h-3.5 fill-current animate-pulse text-amber-600" />
+                   <span>2026-2030 Future Report</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                    <span className="opacity-40 line-through text-[10px]">₹125</span>
+                    <span className="text-lg">₹9 Only</span>
+                 </div>
+               </button>
               <button 
                 onClick={() => document.getElementById('mini-reports')?.scrollIntoView({ behavior: 'smooth' })}
                 className="px-8 py-5 bg-white/5 border border-white/10 text-white font-bold rounded-2xl hover:bg-white/10 active:scale-95 transition-all text-[10px] sm:text-xs uppercase tracking-widest whitespace-nowrap"

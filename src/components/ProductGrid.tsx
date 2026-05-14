@@ -13,11 +13,21 @@ import {
   Clock,
   Star,
   Zap,
+  Sparkles,
   ShieldCheck,
   ChevronLeft
 } from "lucide-react";
 
 const PRODUCTS = [
+  {
+    id: "present-life",
+    icon: <Sparkles className="text-amber-400" />,
+    title: "Present Life Reading",
+    desc: "A deep dive into your current life path, karma, and immediate destiny.",
+    price: 3,
+    originalPrice: 29,
+    time: "Instant"
+  },
   {
     id: "daily-luck",
     icon: <Gem className="text-gold" />,

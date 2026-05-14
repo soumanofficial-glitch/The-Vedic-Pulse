@@ -139,9 +139,10 @@ export default function App() {
           />
         )}
 
-        {isPaying && selectedProduct && (
+        {isPaying && selectedProduct && userDetails && (
           <PaymentFlow 
             price={selectedProduct.price} 
+            userDetails={userDetails}
             onClose={() => setIsPaying(false)} 
             onSuccess={handlePaymentSuccess}
           />

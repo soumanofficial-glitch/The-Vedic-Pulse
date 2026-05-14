@@ -43,8 +43,15 @@ export const AstrologyForm = ({
 
         <form className="space-y-6" onSubmit={(e) => {
           e.preventDefault();
+          
+          // Split name for better Meta CAPI matching
+          const nameParts = formData.name.trim().split(/\s+/);
+          const fn = nameParts[0];
+          const ln = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
           trackMetaEvent("InitiateCheckout", {
-            em: formData.name, // Not actually an email, but we use it as name search data
+            fn: fn,
+            ln: ln,
           }, {
             content_ids: [productId],
             content_type: "product"
