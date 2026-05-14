@@ -2,7 +2,6 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
-import { GoogleGenAI } from "@google/genai";
 import cors from "cors";
 import Razorpay from "razorpay";
 import crypto from "crypto";
@@ -202,9 +201,10 @@ async function startServer() {
 
       if (expectedSignature === razorpay_signature) {
         // Meta Conversions API (CAPI) Tracking
+        const purchaseValue = req.body.amount ? Math.round(req.body.amount / 100) : 9;
         sendMetaEvent("Purchase", userData, {
           currency: "INR",
-          value: 9, // Updated price from previous turn
+          value: purchaseValue,
           order_id: razorpay_order_id,
         }, req);
 

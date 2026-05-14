@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "motion/react";
-import { ShieldCheck, Star, Users, Zap, Sparkles } from "lucide-react";
+import { ShieldCheck, Star, Users, Zap, Sparkles, MessageCircle } from "lucide-react";
 
 export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => void }) => {
   return (
@@ -48,6 +48,18 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
               <div className="flex items-center gap-2">
                  <span className="opacity-40 line-through text-[10px]">₹125</span>
                  <span className="text-lg">₹9 Only</span>
+              </div>
+            </button>
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent("open-astrologer-chat"))}
+              className="px-6 py-5 bg-purple-600 text-white font-black rounded-2xl hover:bg-purple-500 active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(147,51,234,0.4)] group"
+            >
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                <span>Chat with Astrologer</span>
+              </div>
+              <div className="flex items-center gap-2">
+                 <span className="text-xs text-purple-200">3 FREE CHATS</span>
               </div>
             </button>
           </div>
