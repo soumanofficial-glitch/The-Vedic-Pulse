@@ -38,8 +38,8 @@ export const AstrologyForm = ({
           <X size={24} />
         </button>
 
-        <h2 className="text-3xl font-bold mb-2 text-amber-200">Enter Birth Details</h2>
-        <p className="text-gray-400 text-sm mb-8">Guided by 5,000 year old Vedic manuscripts.</p>
+        <h2 className="text-3xl font-bold mb-2 text-amber-200">Janam Kundli Details</h2>
+        <p className="text-gray-400 text-sm mb-8 leading-relaxed">Exact birth details are essential for precise calculation of your Nakshatras, Grahas and Mahadashas.</p>
 
         <form className="space-y-6" onSubmit={(e) => {
           e.preventDefault();
@@ -99,7 +99,7 @@ export const AstrologyForm = ({
             type="submit"
             className="btn-primary w-full text-sm mt-4 flex items-center justify-center gap-2"
           >
-            Calculate Report Insights
+            Generate My Vedic Report
           </button>
           
           <p className="text-[10px] text-center text-gray-500 italic uppercase tracking-[0.2em] font-bold">

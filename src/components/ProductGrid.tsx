@@ -22,7 +22,7 @@ const PRODUCTS = [
   {
     id: "present-life",
     icon: <Sparkles className="text-amber-400" />,
-    title: "Present Life Reading",
+    title: "Prarabdha Karma Reading",
     desc: "A deep dive into your current life path, karma, and immediate destiny.",
     price: 3,
     originalPrice: 29,
@@ -31,7 +31,7 @@ const PRODUCTS = [
   {
     id: "daily-luck",
     icon: <Gem className="text-gold" />,
-    title: "Daily Luck & Muhurat",
+    title: "Dainik Shubh Muhurat",
     desc: "Find your luck score, lucky colors, and energy alignment for today.",
     price: 12,
     originalPrice: 49,
@@ -67,7 +67,7 @@ const PRODUCTS = [
   {
     id: "marriage-muhurat",
     icon: <Calendar className="text-orange-400" />,
-    title: "Marriage Muhurat Finder",
+    title: "Vivah Muhurat Analysis",
     desc: "Favorable wedding dates based on deep Vedic star calculations.",
     price: 49,
     originalPrice: 199,
@@ -90,7 +90,7 @@ export const ProductGrid = ({ onSelect }: { onSelect: (id: string, price: number
   const featuredReports = [
     {
       id: "complete-future",
-      title: "Complete 2026-2030 Future Prediction Report",
+      title: "Maha Kundli: 2026-2030 Vedic Future Report",
       subtitle: "Our Most Detailed Analysis Yet",
       desc: "An exhaustive 50-page breakdown of your karmic cycles, Mahadasha periods, and planetary transits for the next 5 years. Covers Wealth, Health, Marriage, and Career in forensic detail.",
       price: 9,
@@ -105,7 +105,7 @@ export const ProductGrid = ({ onSelect }: { onSelect: (id: string, price: number
       {/* Big Slider / Featured Section */}
       <div className="mb-20">
         <div className="flex items-center justify-between mb-8">
-           <h2 className="text-3xl font-bold text-amber-200">Featured Premium Report</h2>
+           <h2 className="text-3xl font-bold text-amber-200">Premium Kundli Reports</h2>
            <div className="flex gap-2">
              <button className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-500 hover:text-white hover:border-gold/50 transition-all">
                <ChevronLeft size={20} />

@@ -27,7 +27,7 @@ export const Footer = () => {
           </div>
           <div className="h-8 w-px bg-white/10 hidden md:block"></div>
           <a href="#" className="flex items-center gap-2 bg-[#25D366]/10 text-[#25D366] px-5 py-2.5 rounded-full text-xs font-bold border border-[#25D366]/30 hover:bg-[#25D366]/20 transition-all">
-            <MessageCircle size={14} /> Get Free Horoscope on WhatsApp
+            <MessageCircle size={14} /> Get Free Rashifal on WhatsApp
           </a>
         </div>
       </div>
@@ -50,10 +50,10 @@ export const Footer = () => {
             <div>
               <h4 className="font-bold text-xs uppercase tracking-[0.2em] mb-6 text-amber-200/50">Quick Links</h4>
               <ul className="space-y-4 text-xs font-semibold uppercase tracking-widest text-gray-500">
-                <li><button onClick={() => document.getElementById('horoscope')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Daily Horoscope</button></li>
-                <li><button onClick={() => document.getElementById('panjika')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Muhurat Calendar</button></li>
-                <li><button onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Compatibility</button></li>
-                <li><button onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Vastu Tips</button></li>
+                <li><button onClick={() => document.getElementById('horoscope')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Daily Rashifal</button></li>
+                <li><button onClick={() => document.getElementById('panjika')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Vedic Panjika</button></li>
+                <li><button onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Kundli Match</button></li>
+                <li><button onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-amber-400 transition-colors">Vastu Shastra</button></li>
               </ul>
             </div>
 

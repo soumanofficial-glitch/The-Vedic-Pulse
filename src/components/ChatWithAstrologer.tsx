@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { MessageCircle, X, Send, User, Sparkles, Clock, Lock, CreditCard, ChevronDown, Award, ShieldCheck, Users, Star } from "lucide-react";
+import { MessageCircle, X, Send, User, Sparkles, Clock, Lock, CreditCard, ChevronDown, Award, ShieldCheck, Users, Star, BookOpen, CheckCircle, Heart, Zap, Volume2, VolumeX } from "lucide-react";
 import { GoogleGenAI } from "@google/genai";
-// Using a high-quality clip art character illustration of an elderly Indian man for the astrologer
-const astrologerImg = "https://img.freepik.com/free-vector/portrait-wise-old-man-with-turban_23-2148761141.jpg?t=st=1715707531~exp=1715711131~hmac=a4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4";
+// Using a high-quality, realistic portrait of a wise elderly Indian man for the astrologer
+const astrologerImg = "https://images.unsplash.com/photo-1590050752117-23a9d7fc7abc?q=80&w=600&auto=format&fit=crop&crop=faces";
 
 // Initialize Gemini
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -23,13 +23,63 @@ export const ChatWithAstrologer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isQueueing, setIsQueueing] = useState(false);
   const [queuePos, setQueuePos] = useState(2);
+  const [queueProgress, setQueueProgress] = useState(0);
+  const [estimatedWait, setEstimatedWait] = useState(12); // Starting wait in seconds
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const [sessionExpiry, setSessionExpiry] = useState<number | null>(null);
   const [isPaymentRequired, setIsPaymentRequired] = useState(false);
+  const [showFullProfile, setShowFullProfile] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [soundVibe, setSoundVibe] = useState<"meditative" | "mantra" | "nature">("meditative");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const chimeRef = useRef<HTMLAudioElement | null>(null);
+  const bellRef = useRef<HTMLAudioElement | null>(null);
+
+  const SOUND_TRACKS = {
+    meditative: "https://assets.mixkit.co/music/preview/mixkit-meditation-atmosphere-593.mp3",
+    mantra: "https://assets.mixkit.co/music/preview/mixkit-meditation-and-mindfulness-589.mp3", // Spiritual mindfulness
+    nature: "https://assets.mixkit.co/music/preview/mixkit-morning-meditation-relax-618.mp3" // Airy/Nature
+  };
+
+  // Initialize and handle ambient audio
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio(SOUND_TRACKS[soundVibe]);
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.3; // Subtle volume
+    } else {
+      // Update track if vibe changes
+      const wasPlaying = !audioRef.current.paused;
+      audioRef.current.src = SOUND_TRACKS[soundVibe];
+      if (wasPlaying && isOpen && !isMuted) {
+        audioRef.current.play().catch(() => {});
+      }
+    }
+
+    if (!chimeRef.current) {
+      chimeRef.current = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-magic-notification-ring-2359.mp3");
+      chimeRef.current.volume = 0.5;
+    }
+
+    if (!bellRef.current) {
+      bellRef.current = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-temple-bell-single-hit-1493.mp3");
+      bellRef.current.volume = 0.4;
+    }
+
+    if (isOpen && !isMuted) {
+      audioRef.current.play().catch(err => console.error("Audio play failed:", err));
+    } else {
+      audioRef.current.pause();
+    }
+
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, [isOpen, isMuted, soundVibe]);
 
   // Load state from localStorage
   useEffect(() => {
@@ -87,11 +137,37 @@ export const ChatWithAstrologer = () => {
   // Queue logic
   useEffect(() => {
     if (isQueueing) {
-      const timer1 = setTimeout(() => setQueuePos(1), 2500);
-      const timer2 = setTimeout(() => setIsQueueing(false), 5500);
+      setQueueProgress(0);
+      setEstimatedWait(12);
+      
+      const interval = setInterval(() => {
+        setQueueProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            return 100;
+          }
+          const next = prev + 1;
+          
+          // Dynamic queue position updates based on progress
+          if (next > 70) setQueuePos(1);
+          
+          // Update estimated wait
+          setEstimatedWait(Math.max(1, Math.ceil((100 - next) / 8)));
+          
+          return next;
+        });
+      }, 100);
+
+      const completionTimer = setTimeout(() => {
+        setIsQueueing(false);
+        if (!isMuted && bellRef.current) {
+          bellRef.current.play().catch(() => {});
+        }
+      }, 11000); // 11 second total wait
+
       return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
+        clearInterval(interval);
+        clearTimeout(completionTimer);
       };
     }
   }, [isQueueing]);
@@ -111,6 +187,14 @@ export const ChatWithAstrologer = () => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isTyping, isQueueing]);
+
+  // Play chime on new astrologer messages or queue completion
+  useEffect(() => {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && lastMsg.role === "astrologer" && !isMuted && chimeRef.current) {
+      chimeRef.current.play().catch(() => {});
+    }
+  }, [messages, isMuted, isQueueing]);
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
@@ -335,6 +419,42 @@ export const ChatWithAstrologer = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 relative z-10">
+                  <div className="flex flex-col items-center mr-2">
+                    <button 
+                      onClick={() => {
+                        const newMuted = !isMuted;
+                        setIsMuted(newMuted);
+                        if (!newMuted && bellRef.current) {
+                          bellRef.current.play().catch(() => {});
+                        }
+                      }}
+                      className={`p-3 rounded-2xl transition-all border border-white/5 hover:border-white/20 active:scale-95 flex flex-col items-center gap-1 ${isMuted ? 'text-gray-500' : 'text-amber-500 bg-amber-500/10'}`}
+                      title={isMuted ? "Unmute Ambient Sound" : "Mute Ambient Sound"}
+                    >
+                      {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5 animate-pulse" />}
+                      <span className="text-[7px] font-black uppercase tracking-tighter">{isMuted ? "Muted" : "Spiritual"}</span>
+                    </button>
+                    {!isMuted && (
+                      <div className="flex gap-1 mt-1">
+                        {(["meditative", "mantra", "nature"] as const).map(v => (
+                          <button
+                            key={v}
+                            onClick={() => setSoundVibe(v)}
+                            className={`w-1.5 h-1.5 rounded-full transition-all ${soundVibe === v ? 'bg-amber-500 scale-125' : 'bg-white/20 hover:bg-white/40'}`}
+                            title={`Switch to ${v} vibe`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button 
+                    onClick={() => setShowFullProfile(true)}
+                    className="p-3 hover:bg-white/10 rounded-2xl transition-all text-gray-400 hover:text-white border border-white/5 hover:border-white/20 active:scale-95 flex flex-col items-center gap-1"
+                    title="View Qualifications"
+                  >
+                    <Award className="w-6 h-6 text-amber-500" />
+                    <span className="text-[8px] font-black uppercase tracking-tighter">Bio</span>
+                  </button>
                   <button 
                     onClick={() => setIsOpen(false)}
                     className="p-3 hover:bg-white/10 rounded-2xl transition-all text-gray-400 hover:text-white border border-white/5 hover:border-white/20 active:scale-95"
@@ -343,6 +463,133 @@ export const ChatWithAstrologer = () => {
                   </button>
                 </div>
               </div>
+
+              {/* Full Profile Overlay */}
+              <AnimatePresence>
+                {showFullProfile && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="absolute inset-0 z-[70] bg-[#0c0c14] flex flex-col"
+                  >
+                    <div className="p-6 border-b border-white/10 flex items-center justify-between bg-gradient-to-br from-amber-500/10 to-transparent">
+                      <div className="flex items-center gap-3">
+                        <Award className="w-6 h-6 text-amber-500" />
+                        <h3 className="text-lg font-black text-white uppercase tracking-wider">Expert Credentials</h3>
+                      </div>
+                      <button 
+                        onClick={() => setShowFullProfile(false)}
+                        className="p-2 hover:bg-white/10 rounded-xl transition-all text-gray-400"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+                      {/* Hero Info */}
+                      <div className="text-center">
+                        <div className="w-32 h-32 mx-auto rounded-[2.5rem] overflow-hidden border-4 border-amber-500/20 shadow-2xl mb-4 p-1">
+                          <img 
+                            src={astrologerImg} 
+                            alt="Acharya Shivanand"
+                            className="w-full h-full object-cover rounded-[2rem]"
+                          />
+                        </div>
+                        <h4 className="text-2xl font-black text-white mb-1">Acharya Shivanand</h4>
+                        <p className="text-amber-500 font-bold text-xs uppercase tracking-[0.3em]">Vedanta Sahitya Acharya</p>
+                      </div>
+
+                      {/* Stats Bento */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-white/5 p-4 rounded-3xl border border-white/10">
+                          <h5 className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">Qualifications</h5>
+                          <ul className="space-y-2">
+                             <li className="flex items-start gap-2 text-xs text-white leading-tight">
+                               <CheckCircle className="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" />
+                               Ph.D in Vedic Astrology (BHU)
+                             </li>
+                             <li className="flex items-start gap-2 text-xs text-white leading-tight">
+                               <CheckCircle className="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" />
+                               Gold Medalist - Jyotish Visharad
+                             </li>
+                             <li className="flex items-start gap-2 text-xs text-white leading-tight">
+                               <CheckCircle className="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" />
+                               Certified Nadi Expert
+                             </li>
+                          </ul>
+                        </div>
+                        <div className="bg-white/5 p-4 rounded-3xl border border-white/10">
+                          <h5 className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">Experience</h5>
+                          <div className="space-y-3">
+                            <div>
+                               <div className="text-lg font-black text-white">18+</div>
+                               <div className="text-[10px] text-amber-500 uppercase font-bold">Years Practice</div>
+                            </div>
+                            <div>
+                               <div className="text-lg font-black text-white">50k+</div>
+                               <div className="text-[10px] text-amber-500 uppercase font-bold">Readings Done</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Expertise Section */}
+                      <div className="space-y-4">
+                        <h5 className="text-xs text-white uppercase font-black tracking-widest flex items-center gap-2">
+                          <Zap className="w-4 h-4 text-amber-500" />
+                          Specializations
+                        </h5>
+                        <div className="grid grid-cols-1 gap-3">
+                          {[
+                            { title: "Kundli Analysis", desc: "Detailed breakdown of Janam Patri and planetary positions." },
+                            { title: "Matchmaking", desc: "Ashtakoot Guna Milan for successful marriages." },
+                            { title: "Career Guidance", desc: "Timing of career shifts based on Dashas." },
+                            { title: "Modern Vastu", desc: "Earthy remedies for living spaces." }
+                          ].map(spec => (
+                            <div key={spec.title} className="bg-white/5 p-4 rounded-2xl border border-white/5 flex gap-4">
+                              <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500 flex-shrink-0">
+                                <Sparkles className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h6 className="text-white font-bold text-sm tracking-tight">{spec.title}</h6>
+                                <p className="text-xs text-gray-500 mt-1">{spec.desc}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Language & Trust */}
+                      <div className="p-6 bg-amber-500 rounded-3xl text-black">
+                        <div className="flex items-center gap-3 mb-4">
+                          <ShieldCheck className="w-6 h-6" />
+                          <h5 className="font-black text-xs uppercase tracking-widest">Verified Spiritual Guide</h5>
+                        </div>
+                        <p className="text-xs font-bold leading-relaxed opacity-80 mb-4">
+                          Acharya Shivanand is a verified expert on The Vedic Pulse. All consultations follow tradition and privacy standards.
+                        </p>
+                        <div className="flex gap-2">
+                          {["Hindi", "English", "Sanskrit"].map(lang => (
+                            <span key={lang} className="px-3 py-1 bg-black/10 rounded-full text-[10px] font-black uppercase">
+                              {lang}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-6 border-t border-white/10">
+                      <button 
+                         onClick={() => setShowFullProfile(false)}
+                         className="w-full py-4 bg-white/5 text-white font-black rounded-2xl border border-white/10 hover:bg-white/10 transition-all text-xs uppercase tracking-[0.2em]"
+                      >
+                        Back to Consultation
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Status Bar */}
               <div className={`px-5 py-2.5 border-b border-white/5 flex items-center justify-between transition-colors ${
@@ -384,28 +631,87 @@ export const ChatWithAstrologer = () => {
                 className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar bg-[url('https://www.transparenttextures.com/patterns/black-paper.png')]"
               >
                 {isQueueing ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-6">
+                  <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-8">
                     <div className="relative">
-                      <div className="w-24 h-24 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-2xl font-black text-amber-500">#{queuePos}</span>
+                      {/* Outer Ring */}
+                      <svg className="w-32 h-32 -rotate-90">
+                        <circle
+                          cx="64"
+                          cy="64"
+                          r="58"
+                          fill="transparent"
+                          stroke="rgba(245, 158, 11, 0.1)"
+                          strokeWidth="8"
+                        />
+                        <motion.circle
+                          cx="64"
+                          cy="64"
+                          r="58"
+                          fill="transparent"
+                          stroke="currentColor"
+                          strokeWidth="8"
+                          className="text-amber-500"
+                          strokeDasharray="364.4"
+                          initial={{ strokeDashoffset: 364.4 }}
+                          animate={{ strokeDashoffset: 364.4 - (364.4 * queueProgress) / 100 }}
+                          transition={{ duration: 0.1, ease: "linear" }}
+                        />
+                      </svg>
+                      
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <motion.span 
+                          key={queuePos}
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="text-3xl font-black text-amber-500"
+                        >
+                          #{queuePos}
+                        </motion.span>
+                        <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-0.5">In Queue</span>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <h4 className="text-lg font-bold text-white">Connecting to Astrologer...</h4>
-                      <p className="text-sm text-gray-400 leading-relaxed">
-                        Acharya Shivanand is currently finishing a live consultation. You are next in queue.
-                      </p>
+
+                    <div className="space-y-4 w-full">
+                      <div className="space-y-2">
+                        <h4 className="text-xl font-black text-white tracking-tight italic">Acharya is completing a ritual...</h4>
+                        <p className="text-sm text-gray-400 font-medium px-4">
+                          Your chart is being fetched from the celestial archives.
+                        </p>
+                      </div>
+
+                      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 relative overflow-hidden">
+                        <div className="flex justify-between items-center mb-3">
+                          <span className="text-[10px] text-amber-500 uppercase font-black tracking-widest flex items-center gap-2">
+                             <Clock className="w-3 h-3" /> Est. Wait Time
+                          </span>
+                          <span className="text-xs text-white font-bold">~{estimatedWait}s</span>
+                        </div>
+                        
+                        {/* Progress Bar */}
+                        <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                          <motion.div 
+                             className="h-full bg-gradient-to-r from-amber-600 to-amber-300"
+                             initial={{ width: "0%" }}
+                             animate={{ width: `${queueProgress}%` }}
+                             transition={{ duration: 0.1, ease: "linear" }}
+                          />
+                        </div>
+                        
+                        <div className="mt-2 text-[8px] text-gray-600 uppercase font-black tracking-[0.2em]">
+                           Synchronizing with Shani & Brihaspati...
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4 pt-4">
-                      <div className="flex flex-col items-center gap-1">
+                    
+                    <div className="flex items-center gap-5 pt-4">
+                      <div className="flex flex-col items-center gap-1.5 opacity-50">
                         <ShieldCheck className="w-5 h-5 text-green-500" />
-                        <span className="text-[9px] text-gray-500 uppercase font-bold">Secure</span>
+                        <span className="text-[9px] text-gray-500 uppercase font-bold tracking-widest">End-to-End Encrypted</span>
                       </div>
                       <div className="w-px h-8 bg-white/10" />
-                      <div className="flex flex-col items-center gap-1">
+                      <div className="flex flex-col items-center gap-1.5 opacity-50">
                         <Users className="w-5 h-5 text-amber-500" />
-                        <span className="text-[9px] text-gray-500 uppercase font-bold">1.2k+ Active</span>
+                        <span className="text-[9px] text-gray-500 uppercase font-bold tracking-widest">50+ Global Users</span>
                       </div>
                     </div>
                   </div>
@@ -417,43 +723,99 @@ export const ChatWithAstrologer = () => {
                       animate={{ y: 0, opacity: 1 }}
                       className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden mb-8 shadow-2xl relative"
                     >
-                      <div className="absolute top-0 right-0 p-4 opacity-5">
-                         <Sparkles className="w-16 h-16 text-amber-500" />
+                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                         <Award className="w-20 h-20 text-amber-500" />
                       </div>
-                      <div className="bg-gradient-to-r from-amber-500/20 via-transparent to-transparent p-5 flex gap-5">
-                        <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-amber-500/30 flex-shrink-0 shadow-xl group">
-                          <img 
-                            src={astrologerImg} 
-                            alt="Acharya Shivanand"
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
+                      
+                      <div className="bg-gradient-to-br from-amber-500/20 via-transparent to-transparent p-6 flex flex-col sm:flex-row gap-6">
+                        <div className="relative group mx-auto sm:mx-0">
+                          <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-amber-500/30 shadow-xl relative z-10">
+                            <img 
+                              src={astrologerImg} 
+                              alt="Acharya Shivanand"
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                          </div>
+                          <div className="absolute -inset-2 bg-amber-500/10 blur-xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
                         </div>
-                        <div className="flex-1 pt-1">
-                          <h4 className="text-white font-black text-xl tracking-tight">Acharya Shivanand</h4>
-                          <p className="text-[11px] text-amber-500 uppercase font-black tracking-widest mt-1">Vedanta Sahitya Acharya</p>
-                          <div className="flex items-center gap-4 mt-3">
-                             <div className="flex items-center gap-1.5">
-                               <div className="flex">
-                                 {[1,2,3,4,5].map(s => <Star key={s} className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />)}
-                               </div>
-                               <span className="text-[11px] text-white font-bold">4.9/5</span>
-                             </div>
-                             <div className="w-px h-3 bg-white/20" />
-                             <div className="text-[11px] text-gray-300 font-bold uppercase tracking-tighter">18+ Years Exp.</div>
+                        
+                        <div className="flex-1 text-center sm:text-left pt-1">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                            <h4 className="text-white font-black text-2xl tracking-tight">Acharya Shivanand</h4>
+                            <ShieldCheck className="w-5 h-5 text-amber-500 hidden sm:block" />
+                          </div>
+                          <p className="text-xs text-amber-500 font-bold uppercase tracking-[0.2em] mb-4">Vedanta Sahitya Acharya</p>
+                          
+                          <div className="grid grid-cols-2 gap-3 mb-4">
+                            <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
+                              <div className="text-amber-500/70 text-[9px] uppercase font-black mb-0.5">Rating</div>
+                              <div className="flex items-center gap-1.5 justify-center sm:justify-start">
+                                <span className="text-white font-bold text-sm">4.9/5</span>
+                                <div className="flex">
+                                  {[1,2,3,4,5].map(s => <Star key={s} className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
+                              <div className="text-amber-500/70 text-[9px] uppercase font-black mb-0.5">Experience</div>
+                              <div className="text-white font-bold text-sm">18+ Years</div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div className="px-5 py-4 border-t border-white/10 bg-white/5 backdrop-blur-md">
-                        <p className="text-[12px] text-gray-400 leading-relaxed font-medium italic relative">
-                          <span className="text-2xl text-amber-500/20 absolute -top-2 -left-2 overflow-hidden leading-none">"</span>
-                          Guiding souls towards their dharma through the precise movement of planets. Trust the stars, for they never lie.
+
+                      <div className="px-6 py-5 border-t border-white/10 bg-white/[0.02] space-y-5">
+                        {/* Summary */}
+                        <p className="text-[13px] text-gray-300 leading-relaxed font-medium italic relative pl-6">
+                          <span className="text-3xl text-amber-500 absolute -top-1 -left-1 opacity-20 serif leading-none">"</span>
+                          Bridging the gap between ancient Vedic wisdom and modern life challenges through precise Mahadasha and planetary analysis.
                         </p>
-                        <div className="flex flex-wrap gap-2 mt-4">
-                          {["Nadi Jyotish", "Vedic Remedy", "Marriage Expert", "Career Guide"].map(tag => (
-                            <span key={tag} className="px-3 py-1 bg-amber-500/10 rounded-lg text-[10px] text-amber-500 font-bold border border-amber-500/10 uppercase tracking-tight">
-                              {tag}
-                            </span>
-                          ))}
+
+                        {/* Structured Stats */}
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="text-center p-2 rounded-xl bg-white/5 border border-white/5">
+                            <div className="text-amber-500 font-black text-xs">50K+</div>
+                            <div className="text-[8px] text-gray-500 uppercase font-black tracking-widest mt-0.5">Consultations</div>
+                          </div>
+                          <div className="text-center p-2 rounded-xl bg-white/5 border border-white/5">
+                            <div className="text-amber-500 font-black text-xs">Ph.D</div>
+                            <div className="text-[8px] text-gray-500 uppercase font-black tracking-widest mt-0.5">Vedic Studies</div>
+                          </div>
+                          <div className="text-center p-2 rounded-xl bg-white/5 border border-white/5">
+                            <div className="text-amber-500 font-black text-xs">Gold</div>
+                            <div className="text-[8px] text-gray-500 uppercase font-black tracking-widest mt-0.5">Medalist</div>
+                          </div>
+                        </div>
+
+                        {/* Expertise List */}
+                        <div className="space-y-3">
+                          <h5 className="text-[10px] text-gray-500 uppercase font-black tracking-[0.2em] flex items-center gap-2">
+                             <Zap className="w-3 h-3 text-amber-500" /> Key Specializations
+                          </h5>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { label: "Janam Kundli", icon: <BookOpen className="w-3 h-3" /> },
+                              { label: "Vivah Match", icon: <Heart className="w-3 h-3" /> },
+                              { label: "Nadi Jyotish", icon: <CheckCircle className="w-3 h-3" /> },
+                              { label: "Vastu Shastra", icon: <Users className="w-3 h-3" /> }
+                            ].map(item => (
+                              <div key={item.label} className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 rounded-full text-[11px] text-amber-500 font-bold border border-amber-500/20">
+                                {item.icon}
+                                {item.label}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Credentials */}
+                        <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-3.5 h-3.5 text-green-500" />
+                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Certified Vedic Expert</span>
+                          </div>
+                          <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                            Language: <span className="text-gray-300">Hindi, English, Sanskrit</span>
+                          </div>
                         </div>
                       </div>
                     </motion.div>

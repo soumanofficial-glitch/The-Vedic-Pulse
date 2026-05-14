@@ -7,8 +7,11 @@ export async function getDailyHoroscope(zodiac: string): Promise<DailyHoroscope>
   }
 
   const prompt = `
-    Generate a highly accurate Vedic daily horoscope for ${zodiac} for today: ${today}.
-    Provide a specific, non-generic prediction (approx 30-40 words) that feels authentic to today's planetary transits.
+    Generate a highly accurate Vedic daily horoscope (Rashifal) for ${zodiac} for today: ${today}.
+    Provide a specific, non-generic prediction (approx 30-40 words) that feels authentic to Indian Vedic astrology (Jyotish).
+    Use terms like Graha, Karma, or Drishti naturally where appropriate. 
+    DO NOT use markdown formatting like bold asterisks (**) in the prediction text.
+    The tone should be that of a knowledgeable Indian astrologer.
     
     Return in JSON format:
     {
@@ -52,12 +55,12 @@ export async function getDailyHoroscope(zodiac: string): Promise<DailyHoroscope>
     console.error("Daily Horoscope Error:", error);
     // Fallback to pseudo-random but stable daily values if AI fails
     return {
-      prediction: "The stars align for broad spectral growth today. Your persistence is your greatest asset as planetary shifts favor your long-term ambitions.",
+      prediction: "The Grahas align for spiritual growth today. Your persistence in your Swadharma is your greatest asset as planetary Drishti favors your Karman.",
       loveScore: 75,
       careerScore: 80,
       healthScore: 85,
       luckyNumber: 7,
-      luckyColor: "Gold"
+      luckyColor: "Saffron"
     };
   }
 }

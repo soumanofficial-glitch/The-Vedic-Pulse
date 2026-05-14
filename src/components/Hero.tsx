@@ -19,12 +19,12 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
       >
         <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
           <div className="space-y-4">
-             <span className="badge-amber">Instant Vedic Insights</span>
+             <span className="badge-amber">True Vedic Jyotish Analysis</span>
              <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight bg-gradient-to-b from-white via-white to-gray-500 bg-clip-text text-transparent">
-               Complete 2026-2030 <br/> <span className="text-amber-400">Future Prediction Report</span>
+               Detailed 2026-2030 <br/> <span className="text-amber-400">Janam Kundli Report</span>
              </h1>
              <p className="text-gray-400 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
-               Personalized Vedic insights based on your birth details, planetary positions, and numerology.
+               Unlock your destiny with authentic Vedic calculations based on your exact Birth Nakshatras and Planetary Drishti.
              </p>
           </div>
 
@@ -35,11 +35,11 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
             >
               <div className="flex items-center gap-1.5 mb-0.5">
                 <Sparkles className="w-3.5 h-3.5 fill-current animate-pulse text-black" />
-                <span>Present Life Reading</span>
+                <span>Life & Karma Reading</span>
               </div>
               <div className="flex items-center gap-2">
                  <span className="opacity-40 line-through text-[10px]">₹29</span>
-                 <span className="text-lg">₹3 Only</span>
+                 <span className="text-lg">₹3 Dakshina</span>
               </div>
             </button>
             <button 
@@ -48,11 +48,11 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
             >
               <div className="flex items-center gap-1.5 mb-0.5">
                 <Zap className="w-3.5 h-3.5 fill-current animate-pulse text-amber-600" />
-                <span>2026-2030 Future Report</span>
+                <span>2026-2030 Kundli Report</span>
               </div>
               <div className="flex items-center gap-2">
                  <span className="opacity-40 line-through text-[10px]">₹125</span>
-                 <span className="text-lg">₹9 Only</span>
+                 <span className="text-lg">₹9 Dakshina</span>
               </div>
             </button>
             <button 
@@ -70,9 +70,9 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            <StepCard step="01" label="Enter Details" />
-            <StepCard step="02" label="AI Analysis" />
-            <StepCard step="03" label="Instant PDF" />
+            <StepCard step="01" label="Birth Details" />
+            <StepCard step="02" label="Jyotish Analysis" />
+            <StepCard step="03" label="Kundli PDF" />
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-6 pt-4 justify-center lg:justify-start">
@@ -109,8 +109,8 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
             <div className="absolute inset-8 rounded-full border border-amber-500/5 animate-[spin_40s_linear_infinite_reverse]"></div>
             <div className="w-64 h-64 rounded-full bg-gradient-to-tr from-purple-900/20 to-blue-900/20 border border-white/10 flex items-center justify-center shadow-[0_0_60px_rgba(88,28,135,0.2)] backdrop-blur-xl">
               <div className="text-center">
-                <div className="text-6xl mb-2">♈</div>
-                <div className="text-[10px] uppercase tracking-widest text-amber-400 font-bold">Current Muhurat</div>
+                <div className="text-6xl mb-2">ॐ</div>
+                <div className="text-[10px] uppercase tracking-widest text-amber-400 font-bold">Current Ghora</div>
                 <div className="text-2xl font-bold">Shubh</div>
               </div>
             </div>
