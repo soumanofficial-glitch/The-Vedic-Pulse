@@ -2,6 +2,11 @@ import React from "react";
 import { motion } from "motion/react";
 import { ShieldCheck, Star, Users, Zap, Sparkles, MessageCircle } from "lucide-react";
 
+// Import user avatars
+import user1 from "../assets/images/regenerated_image_1778676739185.png";
+import user2 from "../assets/images/regenerated_image_1778676827261.png";
+import user3 from "../assets/images/regenerated_image_1778676830093.png";
+
 export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => void }) => {
   return (
     <section className="relative pt-40 pb-20 px-6 overflow-hidden min-h-screen flex flex-col items-center justify-center">
@@ -72,11 +77,7 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
 
           <div className="flex flex-col sm:flex-row items-center gap-6 pt-4 justify-center lg:justify-start">
              <div className="flex -space-x-3">
-               {[
-                 "/src/assets/images/regenerated_image_1778676739185.png",
-                 "/src/assets/images/regenerated_image_1778676827261.png",
-                 "/src/assets/images/regenerated_image_1778676830093.png"
-               ].map((src, i) => (
+               {[user1, user2, user3].map((src, i) => (
                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[#050508] overflow-hidden bg-gray-600 flex items-center justify-center text-[10px] font-bold">
                    <img 
                     src={src} 
