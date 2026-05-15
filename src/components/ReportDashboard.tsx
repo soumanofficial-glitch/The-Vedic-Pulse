@@ -33,7 +33,7 @@ export const ReportDashboard = ({
   details: BirthDetails;
   onClose: () => void;
 }) => {
-  const [activeTab, setActiveTab] = useState<"overview" | "planetary" | "life" | "remedies">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "nakshatra" | "planetary" | "life" | "remedies">("overview");
   const [isGenerating, setIsGenerating] = useState(false);
   const [shareStatus, setShareStatus] = useState<"idle" | "sharing" | "shared">("idle");
   const [shareUrl, setShareUrl] = useState<string>("");
@@ -248,6 +248,7 @@ export const ReportDashboard = ({
         <div className="flex flex-wrap gap-2 mb-12 border-b border-white/5 pb-4">
           {[
             { id: "overview", label: "Executive Summary", icon: <Star size={14} /> },
+            { id: "nakshatra", label: "Celestial Power", icon: <Flame size={14} /> },
             { id: "planetary", label: "Planetary Transits", icon: <Layers size={14} /> },
             { id: "life", label: "Life Chapters", icon: <Compass size={14} /> },
             { id: "remedies", label: "Remedial Sadhana", icon: <ShieldCheck size={14} /> }
@@ -277,7 +278,21 @@ export const ReportDashboard = ({
           >
             {activeTab === "overview" && (
               <div className="space-y-12">
-                <Section title="Soul Purpose (Karmic Duty)" icon={<Compass className="text-gold" />}>
+                <div className="grid md:grid-cols-2 gap-8">
+                   <Section title="Birth Nakshatra" icon={<Star className="text-gold" />} variant="mini">
+                      <div className="p-6 bg-gold/5 border border-gold/10 rounded-2xl">
+                        <div className="text-2xl font-serif text-white italic mb-1">{report.birthNakshatra}</div>
+                        <div className="text-[10px] text-gold/60 uppercase tracking-widest">Ruled by {report.nakshatraDeity}</div>
+                      </div>
+                   </Section>
+                   <Section title="Karmic Duty" icon={<Compass className="text-gold" />} variant="mini">
+                      <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
+                        <p className="text-sm text-gray-400 italic leading-relaxed">{report.karmicDuty.substring(0, 150)}...</p>
+                      </div>
+                   </Section>
+                </div>
+
+                <Section title="Soul Purpose Deep Dive" icon={<Compass className="text-gold" />}>
                   <p className="text-xl text-gray-300 font-serif italic border-l-2 border-gold/30 pl-8 leading-relaxed">
                     {report.karmicDuty}
                   </p>
@@ -294,6 +309,51 @@ export const ReportDashboard = ({
                   </Section>
                 </div>
               </div>
+            )}
+
+            {activeTab === "nakshatra" && (
+               <div className="space-y-12">
+                 <div className="grid md:grid-cols-3 gap-6">
+                    <div className="glass-card p-8 text-center border-gold/20">
+                       <div className="text-[10px] font-black text-gold/40 uppercase tracking-widest mb-4">Birth Constellation</div>
+                       <div className="text-3xl font-serif text-white italic mb-2">{report.birthNakshatra}</div>
+                       <div className="w-12 h-px bg-gold/30 mx-auto mb-4" />
+                       <div className="text-xs text-gray-400">The primary filter of your cosmic identity</div>
+                    </div>
+                    <div className="glass-card p-8 text-center border-indigo-500/20">
+                       <div className="text-[10px] font-black text-indigo-400/40 uppercase tracking-widest mb-4">Ruling Deity</div>
+                       <div className="text-3xl font-serif text-white italic mb-2">{report.nakshatraDeity}</div>
+                       <div className="w-12 h-px bg-indigo-500/30 mx-auto mb-4" />
+                       <div className="text-xs text-gray-400">The divine energy guiding your soul</div>
+                    </div>
+                    <div className="glass-card p-8 text-center border-emerald-500/20">
+                       <div className="text-[10px] font-black text-emerald-400/40 uppercase tracking-widest mb-4">Sacred Symbol</div>
+                       <div className="text-3xl font-serif text-white italic mb-2">{report.nakshatraSymbol}</div>
+                       <div className="w-12 h-px bg-emerald-500/30 mx-auto mb-4" />
+                       <div className="text-xs text-gray-400">The archetypal representation of your path</div>
+                    </div>
+                 </div>
+
+                 <Section title="Cosmic Influence & Personality" icon={<Flame className="text-gold" />}>
+                    <div className="p-8 bg-[#0f141e] rounded-3xl border border-white/5 relative overflow-hidden group">
+                       <div className="absolute -right-8 -bottom-8 opacity-5 group-hover:opacity-10 transition-opacity rotate-12">
+                          <Star size={240} className="text-gold" />
+                       </div>
+                       <p className="text-lg text-gray-300 leading-relaxed font-serif italic mb-8 relative z-10">
+                          {report.nakshatraInfluence}
+                       </p>
+                       
+                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+                          {report.nakshatraStrengths.map((strength, i) => (
+                            <div key={i} className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
+                               <CheckCircle2 size={16} className="text-gold" />
+                               <span className="text-xs font-bold uppercase tracking-widest text-gray-400">{strength}</span>
+                            </div>
+                          ))}
+                       </div>
+                    </div>
+                 </Section>
+               </div>
             )}
 
             {activeTab === "planetary" && (
@@ -421,6 +481,30 @@ export const ReportDashboard = ({
                <h3 className="text-gold text-[10px] uppercase font-black tracking-widest">Favorable Muhurats</h3>
                <p className="text-xs text-amber-400 font-mono leading-relaxed">{report.favorableTimings}</p>
             </div>
+          </div>
+
+          <div className="space-y-4">
+             <h3 className="text-gold text-[10px] uppercase font-black tracking-widest">Birth Nakshatra & Influence</h3>
+             <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="p-2 border border-white/10 rounded bg-white/5 text-center">
+                   <div className="text-[6px] text-gray-500 uppercase">Nakshatra</div>
+                   <div className="text-[10px] text-white font-serif">{report.birthNakshatra}</div>
+                </div>
+                <div className="p-2 border border-white/10 rounded bg-white/5 text-center">
+                   <div className="text-[6px] text-gray-500 uppercase">Deity</div>
+                   <div className="text-[10px] text-white font-serif">{report.nakshatraDeity}</div>
+                </div>
+                <div className="p-2 border border-white/10 rounded bg-white/5 text-center">
+                   <div className="text-[6px] text-gray-500 uppercase">Symbol</div>
+                   <div className="text-[10px] text-white font-serif">{report.nakshatraSymbol}</div>
+                </div>
+             </div>
+             <p className="text-[10px] text-gray-300 italic leading-relaxed border-l border-gold/30 pl-4 mb-4">{report.nakshatraInfluence}</p>
+             <div className="flex flex-wrap gap-2">
+                {report.nakshatraStrengths.map((s: string, i: number) => (
+                   <span key={i} className="text-[8px] px-2 py-1 bg-white/5 rounded-full text-gold uppercase tracking-tighter">#{s}</span>
+                ))}
+             </div>
           </div>
 
           <div className="space-y-4">

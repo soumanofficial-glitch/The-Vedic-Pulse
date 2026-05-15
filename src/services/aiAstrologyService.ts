@@ -67,6 +67,7 @@ export async function getDailyHoroscope(zodiac: string): Promise<DailyHoroscope>
 
 import { BirthDetails, AstrologyReport, DailyHoroscope } from "../types";
 import { GoogleGenAI, Type } from "@google/genai";
+import { getPanchangForDate } from "./panchangService";
 
 export async function generateAstrologyReport(details: BirthDetails, reportType: string): Promise<AstrologyReport> {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -74,6 +75,8 @@ export async function generateAstrologyReport(details: BirthDetails, reportType:
   if (!apiKey) {
     throw new Error("Gemini API key is missing. Please check your Settings > Secrets.");
   }
+
+  const panchangData = getPanchangForDate(details.dob);
 
   const prompt = `
     You are a legendary Vedic (Jyotish) Astrologer with 30 years of experience. 
@@ -85,12 +88,18 @@ export async function generateAstrologyReport(details: BirthDetails, reportType:
     - Birth Time: ${details.tob}
     - Birth Place: ${details.pob}
 
+    Reference Panchang for Birth Date:
+    - Nakshatra of the day: ${panchangData.nakshatra}
+    - Tithi: ${panchangData.tithi}
+    - Yoga: ${panchangData.yoga}
+
     Guidelines for the Report:
     1. Authenticity: Use actual Vedic terminology (Nakshatra, Mahadasha, Dosha) if relevant.
     2. Specificity: Ensure the insights are unique to the combination of their DOB, TOB, and POB. Do not give generic advice.
     3. Tone: Spiritual, sophisticated, premium, and empowering. Use modern Indian English.
     4. Quantitative: Luck and Energy scores (0-100) must reflect the astrological alignment for the current period.
     5. Actionable: Remedial measures (Upayas) should be practical yet traditional.
+    6. Nakshatra Section: Provide a detailed analysis of their specific birth Nakshatra (based on ${panchangData.nakshatra} but adjusted for their birth time and place).
 
     Return the data in the following JSON format ONLY:
     {
@@ -110,7 +119,12 @@ export async function generateAstrologyReport(details: BirthDetails, reportType:
       "mahadashaPeriod": "Analysis of current Mahadasha and its influence...",
       "shaniSadeSati": "Current status of Saturn's transit and its effects...",
       "karmicDuty": "Your soul's primary purpose for this lifetime...",
-      "dailySadhana": "Set of morning/evening rituals for planetary balance..."
+      "dailySadhana": "Set of morning/evening rituals for planetary balance...",
+      "birthNakshatra": "The name of their birth Nakshatra",
+      "nakshatraDeity": "The ruling deity of the Nakshatra",
+      "nakshatraSymbol": "The symbol of the Nakshatra",
+      "nakshatraInfluence": "A profound 100-word analysis of how this Nakshatra influences their personality and destiny",
+      "nakshatraStrengths": ["Strength 1", "Strength 2", "Strength 3"]
     }
   `;
 
@@ -128,7 +142,8 @@ export async function generateAstrologyReport(details: BirthDetails, reportType:
             "favorableTimings", "planetaryAlignment", "relationshipEnergy", 
             "financialEnergy", "personalizedInsight", "careerAnalysis",
             "healthAnalysis", "loveAnalysis", "remedies", "mahadashaPeriod",
-            "shaniSadeSati", "karmicDuty", "dailySadhana"
+            "shaniSadeSati", "karmicDuty", "dailySadhana",
+            "birthNakshatra", "nakshatraDeity", "nakshatraSymbol", "nakshatraInfluence", "nakshatraStrengths"
           ],
           properties: {
             luckScore: { type: Type.NUMBER },
@@ -147,7 +162,12 @@ export async function generateAstrologyReport(details: BirthDetails, reportType:
             mahadashaPeriod: { type: Type.STRING },
             shaniSadeSati: { type: Type.STRING },
             karmicDuty: { type: Type.STRING },
-            dailySadhana: { type: Type.STRING }
+            dailySadhana: { type: Type.STRING },
+            birthNakshatra: { type: Type.STRING },
+            nakshatraDeity: { type: Type.STRING },
+            nakshatraSymbol: { type: Type.STRING },
+            nakshatraInfluence: { type: Type.STRING },
+            nakshatraStrengths: { type: Type.ARRAY, items: { type: Type.STRING } }
           }
         }
       }

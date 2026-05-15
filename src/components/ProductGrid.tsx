@@ -174,10 +174,16 @@ export const ProductGrid = ({ onSelect }: { onSelect: (id: string, price: number
 
                 <div className="flex flex-col sm:flex-row items-center gap-6 pt-4">
                   <div className="flex flex-col">
-                    <span className="text-gray-500 line-through text-sm font-medium">Original Price: ₹{featuredReports[0].originalPrice}</span>
+                    <span className="text-gray-500 line-through text-sm font-medium italic">Traditional Dakshina: ₹{featuredReports[0].originalPrice}</span>
                     <div className="flex items-baseline gap-2">
                       <span className="text-5xl font-black text-amber-400 italic tracking-tighter">₹{featuredReports[0].price}</span>
-                      <span className="text-amber-500/50 text-xs font-bold uppercase tracking-widest">Early Access Offer</span>
+                      <div className="flex flex-col">
+                        <span className="text-amber-500/80 text-[10px] font-black uppercase tracking-widest">Divine Dakshina</span>
+                        <div className="bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1 mt-1">
+                          <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[8px] text-emerald-500 font-black uppercase tracking-widest">No Hidden Cost</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <button className="bg-gold text-navy font-bold px-8 py-4 rounded-2xl hover:bg-white transition-all transform group-hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(251,191,36,0.3)] flex items-center gap-3">
@@ -230,8 +236,12 @@ export const ProductGrid = ({ onSelect }: { onSelect: (id: string, price: number
                 {product.icon}
               </div>
               <div className="text-right">
-                <div className="text-[10px] text-gray-500 line-through">₹{product.originalPrice}</div>
-                <div className="text-xl font-black text-amber-400 leading-none mt-1">₹{product.price}</div>
+                <div className="text-[10px] text-gray-500 line-through italic">₹{product.originalPrice}</div>
+                <div className="text-xl font-black text-amber-400 leading-none mt-1">₹{product.price} <span className="text-[10px] text-amber-500/50 uppercase tracking-tighter">Dakshina</span></div>
+                <div className="flex items-center gap-1 mt-2 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/10 self-end">
+                   <div className="w-0.5 h-0.5 rounded-full bg-emerald-500 animate-pulse" />
+                   <span className="text-[7px] text-emerald-500 font-black uppercase tracking-widest">No Hidden Cost</span>
+                </div>
               </div>
             </div>
 
@@ -249,6 +259,26 @@ export const ProductGrid = ({ onSelect }: { onSelect: (id: string, price: number
             </div>
           </motion.div>
         ))}
+      </div>
+
+      <div className="mt-12 flex flex-col items-center justify-center gap-4 py-8 border-t border-white/5">
+        <div className="flex items-center gap-6 flex-wrap justify-center">
+          <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-widest">
+            <ShieldCheck size={14} className="text-emerald-500" />
+            One-Time Payment
+          </div>
+          <div className="w-1 h-1 rounded-full bg-white/10 hidden sm:block" />
+          <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-widest">
+            <ShieldCheck size={14} className="text-emerald-500" />
+            No Hidden Charges
+          </div>
+          <div className="w-1 h-1 rounded-full bg-white/10 hidden sm:block" />
+          <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-widest">
+            <ShieldCheck size={14} className="text-emerald-500" />
+            No Subscriptions
+          </div>
+        </div>
+        <p className="text-gray-600 text-[10px] italic">Strictly non-recurring. You only pay for what you buy.</p>
       </div>
     </section>
   );

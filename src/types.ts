@@ -24,6 +24,12 @@ export interface AstrologyReport {
   shaniSadeSati: string;
   karmicDuty: string;
   dailySadhana: string;
+  // Nakshatra specific fields
+  birthNakshatra: string;
+  nakshatraDeity: string;
+  nakshatraSymbol: string;
+  nakshatraInfluence: string;
+  nakshatraStrengths: string[];
 }
 
 export interface DailyHoroscope {

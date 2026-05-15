@@ -179,7 +179,13 @@ export const PaymentFlow = ({
                 ₹{price}
                 <span className="text-gray-600 text-sm line-through font-medium">₹125</span>
               </h2>
-              <p className="text-gray-400 text-[10px] uppercase tracking-[0.3em] font-black italic">Activate Your Destiny</p>
+              <div className="flex flex-col items-center">
+                 <p className="text-amber-500/80 text-[10px] uppercase tracking-[0.3em] font-black italic">Sacred {price} Dakshina</p>
+                 <div className="bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5 mt-2">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest leading-none">No Hidden Cost</span>
+                 </div>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -187,6 +193,14 @@ export const PaymentFlow = ({
                 <p className="text-xs text-gray-400 leading-relaxed">
                   Join <span className="text-white font-bold">12,400+ Seekers</span> who unlocked their karmic blueprints today.
                 </p>
+                <div className="flex items-center justify-center gap-4 text-[9px] text-emerald-400/80 font-black uppercase tracking-widest bg-emerald-500/5 py-2 rounded-xl">
+                   <div className="flex items-center gap-1">
+                      <ShieldCheck size={10} />
+                      One-Time
+                   </div>
+                   <div className="w-px h-3 bg-white/10" />
+                   <span>No hidden fees</span>
+                </div>
               </div>
 
               {errorMessage && (
@@ -204,6 +218,10 @@ export const PaymentFlow = ({
                 {loading ? <Loader2 className="animate-spin" size={16} /> : null}
                 {loading ? "Initializing..." : "Pay Securely with Razorpay"}
               </button>
+
+              <p className="text-center text-[8px] text-gray-500 italic mt-2">
+                This is a <span className="text-emerald-500 font-bold">one-time payment</span>. No recurring charges or hidden fees.
+              </p>
 
               <div className="flex items-center justify-between pt-6 mt-4 border-t border-white/5">
                  <div className="flex items-center gap-2 text-white/30 text-[9px] font-black uppercase tracking-widest">

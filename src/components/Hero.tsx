@@ -41,6 +41,10 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
                  <span className="opacity-40 line-through text-[10px]">₹29</span>
                  <span className="text-lg">₹3 Dakshina</span>
               </div>
+              <div className="bg-black/5 px-2 py-0.5 rounded-full border border-black/5 flex items-center gap-1 mt-1">
+                 <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                 <span className="text-[7px] text-black/60 font-black uppercase tracking-widest">No Hidden Cost</span>
+              </div>
             </button>
             <button 
               onClick={() => onSelect ? onSelect("complete-future", 9) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
@@ -53,6 +57,10 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
               <div className="flex items-center gap-2">
                  <span className="opacity-40 line-through text-[10px]">₹125</span>
                  <span className="text-lg">₹9 Dakshina</span>
+              </div>
+              <div className="bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1 mt-1">
+                 <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                 <span className="text-[7px] text-emerald-600 font-black uppercase tracking-widest">No Hidden Cost</span>
               </div>
             </button>
             <button 
