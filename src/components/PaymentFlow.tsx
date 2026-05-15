@@ -180,7 +180,7 @@ export const PaymentFlow = ({
                 <span className="text-gray-600 text-sm line-through font-medium">₹125</span>
               </h2>
               <div className="flex flex-col items-center">
-                 <p className="text-amber-500/80 text-[10px] uppercase tracking-[0.3em] font-black italic">Sacred {price} Dakshina</p>
+                 <p className="text-amber-500/80 text-[10px] uppercase tracking-[0.3em] font-black italic">Sacred {price} Only!</p>
                  <div className="bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5 mt-2">
                     <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest leading-none">No Hidden Cost</span>
