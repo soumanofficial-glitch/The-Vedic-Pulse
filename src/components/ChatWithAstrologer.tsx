@@ -5,9 +5,6 @@ import { GoogleGenAI } from "@google/genai";
 // Using a high-quality, realistic portrait of a wise elderly Indian man for the astrologer
 const astrologerImg = "https://images.unsplash.com/photo-1601054704854-1a2e79dac4d3?q=80&w=800&auto=format&fit=crop";
 
-// Initialize Gemini
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
-
 interface Message {
   id: string;
   role: "user" | "astrologer";
@@ -221,7 +218,11 @@ export const ChatWithAstrologer = () => {
     setInputText("");
     setMessageCount(prev => prev + 1);
     setIsTyping(true);
+    
     try {
+      // Re-initialize for each request as per skill recommendations for some environments
+      const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+      
       const systemInstruction = `
         You are Acharya Shivanand, a senior Vedic Astrologer with 18+ years of experience.
         Your style is deeply human, warm, and traditional. You are NOT an AI assistant. You are a real person who cares.
@@ -244,21 +245,36 @@ export const ChatWithAstrologer = () => {
         You are talking on 'The Vedic Pulse'. You represent the peak of spiritual guidance.
       `;
 
-      const history = messages.map(msg => ({
-        role: msg.role === "user" ? "user" : "model",
-        parts: [{ text: msg.text }]
-      }));
+      // Build contents array for generateContent, ensuring it starts with 'user'
+      const contents = [];
+      const chatMessages = [...messages, newUserMessage];
+      
+      for (let i = 0; i < chatMessages.length; i++) {
+        const msg = chatMessages[i];
+        const role = msg.role === "user" ? "user" : "model";
+        
+        // Ensure valid sequence for Gemini [user, model, user, model...]
+        if (contents.length === 0 && role === "model") continue;
+        
+        // Skip duplicate roles if any exist by mistake
+        if (contents.length > 0 && contents[contents.length-1].role === role) continue;
 
-      const chat = ai.chats.create({
-        model: "gemini-3-flash-preview",
+        contents.push({
+          role,
+          parts: [{ text: msg.text }]
+        });
+      }
+
+      const result = await genAI.models.generateContent({
+        model: "gemini-flash-latest",
+        contents,
         config: {
           systemInstruction,
+          temperature: 0.8,
         },
-        history,
       });
 
-      const result = await chat.sendMessage({ message: inputText });
-      const responseText = result.text || "The stars are silent right now. Please try again later.";
+      const responseText = result.text || "The stars are a bit cloudy today. Please ask your question again, my child.";
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -270,10 +286,11 @@ export const ChatWithAstrologer = () => {
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error("AI Error:", error);
+      const errorDetail = error instanceof Error ? error.message : "Cosmic Interference";
       const errorMessage: Message = {
         id: "error",
         role: "astrologer",
-        text: "The cosmic signals are a bit weak right now. Please try asking again in a moment.",
+        text: `Om Namah Shivaya! I am sensing a temporary cosmic misalignment (${errorDetail}). Please wait a moment and ask again, my child.`,
         timestamp: Date.now(),
       };
       setMessages(prev => [...prev, errorMessage]);
