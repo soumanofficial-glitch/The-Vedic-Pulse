@@ -12,7 +12,7 @@ interface Message {
   timestamp: number;
 }
 
-const FREE_MESSAGE_LIMIT = 3;
+const FREE_TRIAL_DURATION_MS = 30 * 1000;
 const SESSION_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 const PRICE_INR = 7;
 
@@ -25,8 +25,9 @@ export const ChatWithAstrologer = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [messageCount, setMessageCount] = useState(0);
+  const [freeTrialStartedAt, setFreeTrialStartedAt] = useState<number | null>(null);
   const [sessionExpiry, setSessionExpiry] = useState<number | null>(null);
+  const [currentTime, setCurrentTime] = useState(Date.now());
   const [isPaymentRequired, setIsPaymentRequired] = useState(false);
   const [showFullProfile, setShowFullProfile] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -101,8 +102,8 @@ export const ChatWithAstrologer = () => {
     window.addEventListener("open-astrologer-chat", handleOpenChat);
     window.addEventListener("popstate", handlePopState);
 
-    const savedMsgCount = localStorage.getItem("chat_msg_count");
-    if (savedMsgCount) setMessageCount(parseInt(savedMsgCount));
+    const savedFreeTrialStartedAt = localStorage.getItem("chat_free_trial_start");
+    if (savedFreeTrialStartedAt) setFreeTrialStartedAt(parseInt(savedFreeTrialStartedAt));
 
     const savedExpiry = localStorage.getItem("chat_session_expiry");
     if (savedExpiry) {
@@ -158,6 +159,12 @@ export const ChatWithAstrologer = () => {
 
       const completionTimer = setTimeout(() => {
         setIsQueueing(false);
+        // Start free trial exactly when chat becomes available if not already started
+        if (!freeTrialStartedAt && !sessionExpiry) {
+           const start = Date.now();
+           setFreeTrialStartedAt(start);
+           localStorage.setItem("chat_free_trial_start", start.toString());
+        }
         if (!isMuted && bellRef.current) {
           bellRef.current.play().catch(() => {});
         }
@@ -172,12 +179,14 @@ export const ChatWithAstrologer = () => {
 
   // Save state to localStorage
   useEffect(() => {
-    localStorage.setItem("chat_msg_count", messageCount.toString());
+    if (freeTrialStartedAt) {
+      localStorage.setItem("chat_free_trial_start", freeTrialStartedAt.toString());
+    }
     if (sessionExpiry) {
       localStorage.setItem("chat_session_expiry", sessionExpiry.toString());
     }
     localStorage.setItem("chat_messages", JSON.stringify(messages));
-  }, [messageCount, sessionExpiry, messages]);
+  }, [freeTrialStartedAt, sessionExpiry, messages]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -197,12 +206,12 @@ export const ChatWithAstrologer = () => {
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
-    // Check if session is valid or if we have free messages
+    // Check if session is valid or if we are within 30s free trial
     const now = Date.now();
     const hasActiveSession = sessionExpiry && sessionExpiry > now;
-    const hasFreeMessages = messageCount < FREE_MESSAGE_LIMIT;
+    const isWithinFreeTrial = freeTrialStartedAt && (now - freeTrialStartedAt < FREE_TRIAL_DURATION_MS);
 
-    if (!hasActiveSession && !hasFreeMessages) {
+    if (!hasActiveSession && !isWithinFreeTrial) {
       setIsPaymentRequired(true);
       return;
     }
@@ -216,7 +225,6 @@ export const ChatWithAstrologer = () => {
 
     setMessages(prev => [...prev, newUserMessage]);
     setInputText("");
-    setMessageCount(prev => prev + 1);
     setIsTyping(true);
     
     try {
@@ -310,20 +318,30 @@ export const ChatWithAstrologer = () => {
     }
   };
 
-  // Timer logic
+  // Free Trial & Session Timer logic
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (sessionExpiry && sessionExpiry > Date.now()) {
-      timer = setInterval(() => {
-        if (Date.now() >= sessionExpiry) {
-          setSessionExpiry(null);
+    timer = setInterval(() => {
+      const now = Date.now();
+      setCurrentTime(now);
+      
+      // Check Premium Session Expiry
+      if (sessionExpiry && now >= sessionExpiry) {
+        setSessionExpiry(null);
+        setIsPaymentRequired(true);
+      }
+      
+      // Check Free Trial Expiry (only if no active premium session)
+      if (!sessionExpiry && freeTrialStartedAt) {
+        const timeElapsed = now - freeTrialStartedAt;
+        if (timeElapsed >= FREE_TRIAL_DURATION_MS) {
           setIsPaymentRequired(true);
-          clearInterval(timer);
         }
-      }, 1000);
-    }
+      }
+    }, 1000);
+    
     return () => clearInterval(timer);
-  }, [sessionExpiry]);
+  }, [sessionExpiry, freeTrialStartedAt]);
 
   const handlePayment = async () => {
     try {
@@ -372,7 +390,7 @@ export const ChatWithAstrologer = () => {
     }
   };
 
-  const timeLeft = sessionExpiry ? Math.max(0, Math.floor((sessionExpiry - Date.now()) / 1000)) : 0;
+  const timeLeft = sessionExpiry ? Math.max(0, Math.floor((sessionExpiry - currentTime) / 1000)) : 0;
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
@@ -396,7 +414,7 @@ export const ChatWithAstrologer = () => {
           1
         </span>
         <div className="absolute right-full mr-4 bg-white text-black px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
-           Chat with an Astrologer (3 FREE)
+           Chat with an Astrologer (30 SEC FREE)
         </div>
       </button>
 
@@ -646,10 +664,10 @@ export const ChatWithAstrologer = () => {
                       <span className="text-amber-500 font-bold hidden sm:inline">Premium Session Active</span>
                     </div>
                   ) : (
-                    <>
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>{Math.max(0, FREE_MESSAGE_LIMIT - messageCount)} Free Messages Available</span>
-                    </>
+                    <div className="flex items-center gap-2">
+                       <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                       <span>{freeTrialStartedAt ? Math.max(0, Math.ceil((FREE_TRIAL_DURATION_MS - (currentTime - freeTrialStartedAt)) / 1000)) : 30}s FREE TRIAL LEFT</span>
+                    </div>
                   )}
                 </div>
                 {sessionExpiry && sessionExpiry > Date.now() && (
