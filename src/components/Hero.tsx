@@ -19,7 +19,7 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
       >
         <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
           <div className="space-y-4">
-             <span className="badge-amber">True Vedic Jyotish Analysis</span>
+             <span className="badge-amber">Making Astrology Accessible for everyone</span>
              <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight bg-gradient-to-b from-white via-white to-gray-500 bg-clip-text text-transparent">
                Detailed 2026-2030 <br/> <span className="text-amber-400">Janam Kundli Report</span>
              </h1>
