@@ -17,7 +17,7 @@ interface Message {
 
 const FREE_MESSAGE_LIMIT = 3;
 const SESSION_DURATION_MS = 5 * 60 * 1000; // 5 minutes
-const PRICE_INR = 39;
+const PRICE_INR = 7;
 
 export const ChatWithAstrologer = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -894,7 +894,7 @@ export const ChatWithAstrologer = () => {
 
                   <div className="grid grid-cols-2 gap-4 relative">
                     <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 group hover:border-amber-500/30 transition-colors">
-                      <div className="text-amber-500 font-black text-2xl">₹39</div>
+                      <div className="text-amber-500 font-black text-2xl">₹7</div>
                       <div className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-1">Special Dakshina</div>
                     </div>
                     <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 group hover:border-amber-500/30 transition-colors">
