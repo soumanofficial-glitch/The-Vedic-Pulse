@@ -40,11 +40,17 @@ async function startServer() {
     next();
   });
 
-  // Razorpay instance
-  const razorpay = new RazorpayConstructor({
-    key_id: process.env.RAZORPAY_KEY_ID || "",
-    key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-  });
+  // Razorpay instance - wrap in try-catch to prevent server crash if keys are missing
+  let razorpay: any = null;
+  try {
+    razorpay = new RazorpayConstructor({
+      key_id: process.env.RAZORPAY_KEY_ID || "",
+      key_secret: process.env.RAZORPAY_KEY_SECRET || "",
+    });
+    console.log("[SERVER] Razorpay initialized");
+  } catch (err) {
+    console.error("[SERVER] Razorpay initialization failed:", err);
+  }
 
   // Meta CAPI Helper
   const hash = (val: any) => {
@@ -152,7 +158,7 @@ async function startServer() {
   });
 
   // Gemini Chat Endpoint
-  app.post("/api/gemini/chat", async (req, res) => {
+  app.post("/api/chat", async (req, res) => {
     try {
       const { contents, systemInstruction } = req.body;
       
@@ -160,19 +166,22 @@ async function startServer() {
         return res.status(400).json({ error: "Invalid contents provided" });
       }
 
-      console.log("[GEMINI] Generating content with model: gemini-2.0-flash");
+      console.log("[GEMINI] Generating content with model: gemini-3-flash-preview");
       
       if (!process.env.GEMINI_API_KEY) {
         console.error("[GEMINI] Missing GEMINI_API_KEY");
-        return res.status(500).json({ error: "Gemini API key not configured" });
+        return res.status(500).json({ error: "Gemini API key not configured. Please check AI Studio Settings > Secrets." });
       }
 
+      // Ensure contents is a clean array
+      const apiContents = Array.isArray(contents) ? contents : [{ role: 'user', parts: [{ text: String(contents) }] }];
+
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents,
+        model: "gemini-3-flash-preview",
+        contents: apiContents,
         config: {
           systemInstruction: systemInstruction || "You are a helpful assistant.",
-          temperature: 0.8,
+          temperature: 0.7,
         },
       });
 
@@ -209,6 +218,10 @@ async function startServer() {
       const { amount, currency = "INR" } = req.body;
       
       console.log(`[PAYMENT] Creating order for amount: ${amount}`);
+
+      if (!razorpay) {
+        return res.status(500).json({ error: "Razorpay not initialized. Please check keys." });
+      }
 
       if (!amount || amount < 100) {
         return res.status(400).json({ error: "Amount must be at least 100 paise" });
@@ -282,6 +295,15 @@ async function startServer() {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
+
+  // Error handling middleware
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error("[SERVER ERROR]", err);
+    res.status(500).json({ 
+      error: "Internal Server Error", 
+      message: err.message || "Unknown error" 
+    });
+  });
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running at http://localhost:${PORT}`);

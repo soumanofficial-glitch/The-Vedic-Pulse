@@ -273,15 +273,23 @@ export const ChatWithAstrologer = () => {
         });
       }
 
-      const response = await fetch("/api/gemini/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents, systemInstruction }),
       });
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.details || "Failed to get response from stars");
+        const text = await response.text();
+        let errorMessage = "Failed to get response from stars";
+        try {
+          const errData = JSON.parse(text);
+          errorMessage = errData.details || errData.error || errorMessage;
+        } catch (e) {
+          console.error("Non-JSON error response:", text);
+          errorMessage = `Cosmic error: ${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
