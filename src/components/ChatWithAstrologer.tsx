@@ -11,7 +11,7 @@ interface Message {
   timestamp: number;
 }
 
-const FREE_TRIAL_DURATION_MS = 30 * 1000;
+const FREE_TRIAL_DURATION_MS = 60 * 1000;
 const SESSION_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 const PRICE_INR = 49;
 
@@ -421,7 +421,7 @@ export const ChatWithAstrologer = () => {
           1
         </span>
         <div className="absolute right-full mr-4 bg-white text-black px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
-           Free Chat (FIRST 30 SEC FREE)
+           Free Chat (FIRST 1 MIN FREE)
         </div>
       </button>
 

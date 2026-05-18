@@ -72,7 +72,7 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
                 <span>Chat with Astrologer</span>
               </div>
               <div className="flex items-center gap-2">
-                 <span className="text-xs text-purple-100 uppercase font-black tracking-widest">30 SEC FREE TRIAL</span>
+                 <span className="text-xs text-purple-100 uppercase font-black tracking-widest">1 MIN FREE TRIAL</span>
                  <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
                  <span className="text-[10px] text-purple-200 font-bold uppercase">Free Chat</span>
               </div>
