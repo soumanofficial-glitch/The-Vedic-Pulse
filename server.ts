@@ -6,11 +6,23 @@ import cors from "cors";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
+import { GoogleGenAI } from "@google/genai";
+
 // Handle potential ESM/CJS default import discrepancies
 const RazorpayConstructor = (Razorpay as any).default || Razorpay;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Initialize Gemini
+const ai = new GoogleGenAI({ 
+  apiKey: process.env.GEMINI_API_KEY || "", 
+  httpOptions: {
+    headers: {
+      'User-Agent': 'aistudio-build',
+    }
+  }
+});
 
 console.log("[SERVER] Initializing server.ts...");
 
@@ -137,6 +149,34 @@ async function startServer() {
   // Health check
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", time: new Date().toISOString() });
+  });
+
+  // Gemini Chat Endpoint
+  app.post("/api/gemini/chat", async (req, res) => {
+    try {
+      const { contents, systemInstruction } = req.body;
+      
+      if (!contents || !Array.isArray(contents)) {
+        return res.status(400).json({ error: "Invalid contents provided" });
+      }
+
+      const response = await ai.models.generateContent({
+        model: "gemini-1.5-flash-lite",
+        contents,
+        config: {
+          systemInstruction: systemInstruction || "You are a helpful assistant.",
+          temperature: 0.8,
+        },
+      });
+
+      res.json({ text: response.text });
+    } catch (error) {
+      console.error("[GEMINI] Chat Error:", error);
+      res.status(500).json({ 
+        error: "Failed to generate content", 
+        details: error instanceof Error ? error.message : String(error) 
+      });
+    }
   });
 
   // Debug route

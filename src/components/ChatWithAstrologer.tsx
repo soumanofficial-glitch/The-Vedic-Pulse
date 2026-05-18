@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { MessageCircle, X, Send, User, Sparkles, Clock, Lock, CreditCard, ChevronDown, Award, ShieldCheck, Users, Star, BookOpen, CheckCircle, Heart, Zap, Volume2, VolumeX } from "lucide-react";
-import { GoogleGenAI } from "@google/genai";
 // Using a high-quality, realistic portrait of a wise elderly Indian man for the astrologer
 const astrologerImg = "https://images.unsplash.com/photo-1601054704854-1a2e79dac4d3?q=80&w=800&auto=format&fit=crop";
 
@@ -14,7 +13,7 @@ interface Message {
 
 const FREE_TRIAL_DURATION_MS = 30 * 1000;
 const SESSION_DURATION_MS = 5 * 60 * 1000; // 5 minutes
-const PRICE_INR = 7;
+const PRICE_INR = 49;
 
 export const ChatWithAstrologer = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -228,9 +227,6 @@ export const ChatWithAstrologer = () => {
     setIsTyping(true);
     
     try {
-      // Re-initialize for each request as per skill recommendations for some environments
-      const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
-      
       const systemInstruction = `
         You are Acharya Shivanand, a senior Vedic Astrologer with 18+ years of experience.
         Your style is deeply human, warm, and traditional. You are NOT an AI assistant. You are a real person who cares.
@@ -273,16 +269,19 @@ export const ChatWithAstrologer = () => {
         });
       }
 
-      const result = await genAI.models.generateContent({
-        model: "gemini-3.1-flash-lite",
-        contents,
-        config: {
-          systemInstruction,
-          temperature: 0.8,
-        },
+      const response = await fetch("/api/gemini/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents, systemInstruction }),
       });
 
-      const responseText = result.text || "The stars are a bit cloudy today. Please ask your question again, my child.";
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.details || "Failed to get response from stars");
+      }
+
+      const data = await response.json();
+      const responseText = data.text || "The stars are a bit cloudy today. Please ask your question again, my child.";
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -940,7 +939,7 @@ export const ChatWithAstrologer = () => {
 
                   <div className="grid grid-cols-2 gap-4 relative">
                     <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 group hover:border-amber-500/30 transition-colors">
-                      <div className="text-amber-500 font-black text-2xl">₹7</div>
+                      <div className="text-amber-500 font-black text-2xl">₹49</div>
                       <div className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-1">Special Only!</div>
                     </div>
                     <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 group hover:border-amber-500/30 transition-colors">
