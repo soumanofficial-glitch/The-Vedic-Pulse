@@ -161,7 +161,7 @@ async function startServer() {
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash-lite",
+        model: "gemini-1.5-flash",
         contents,
         config: {
           systemInstruction: systemInstruction || "You are a helpful assistant.",
@@ -241,7 +241,7 @@ async function startServer() {
 
       if (expectedSignature === razorpay_signature) {
         // Meta Conversions API (CAPI) Tracking
-        const purchaseValue = req.body.amount ? Math.round(req.body.amount / 100) : 9;
+        const purchaseValue = req.body.amount ? Math.round(req.body.amount / 100) : 49;
         sendMetaEvent("Purchase", userData, {
           currency: "INR",
           value: purchaseValue,
