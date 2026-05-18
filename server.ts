@@ -130,45 +130,38 @@ async function startServer() {
     }
   };
 
-  // API Routes MUST be defined BEFORE Vite middleware
-  const apiRouter = express.Router();
-
-  // Generic Tracking Endpoint
-  apiRouter.post("/track", (req, res) => {
-    const { eventName, userData = {}, customData = {} } = req.body;
-    if (!eventName) return res.status(400).json({ error: "eventName is required" });
-    sendMetaEvent(eventName, userData, customData, req);
-    res.json({ status: "queued" });
-  });
-
-  // Health check
-  apiRouter.get("/health", (req, res) => {
+  // API Routes directly on app to avoid router nesting issues
+  app.get("/api/health", (req, res) => {
     res.json({ status: "ok", node_env: process.env.NODE_ENV });
   });
 
   // Gemini Chat Endpoint
-  apiRouter.post("/chat", async (req, res) => {
+  app.post("/api/chat", async (req, res) => {
+    console.log(`[SERVER] Handling POST /api/chat`);
     try {
       const { contents, systemInstruction } = req.body;
       
       if (!contents || !Array.isArray(contents)) {
+        console.error("[SERVER] Invalid contents:", contents);
         return res.status(400).json({ error: "Invalid contents provided" });
       }
 
-      console.log("[GEMINI] Generating content with model: gemini-3-flash");
-      
-      if (!process.env.GEMINI_API_KEY) {
-        return res.status(500).json({ error: "Gemini API key not configured." });
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        console.error("[GEMINI] Missing GEMINI_API_KEY in environment");
+        return res.status(500).json({ error: "Gemini API key not configured in AI Studio Secrets." });
       }
 
-      // Initialize the model
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-3-flash",
+      console.log("[GEMINI] Generating content with model: gemini-1.5-flash");
+      
+      // Initialize the model inside the handler to ensure it uses the latest env vars
+      const genAIClient = new GoogleGenerativeAI(apiKey);
+      const model = genAIClient.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
         systemInstruction: systemInstruction || "You are a helpful assistant."
       });
 
       // Format contents for @google/generative-ai
-      // It expects contents as an array of { role: 'user' | 'model', parts: [{ text: string }] }
       const history = contents.slice(0, -1).map(c => ({
         role: c.role === "model" ? "model" : "user",
         parts: [{ text: c.parts[0].text }]
@@ -184,8 +177,8 @@ async function startServer() {
       });
 
       const result = await chat.sendMessage(lastMessage);
-      const response = await result.response;
-      const text = response.text();
+      const geminiResponse = await result.response;
+      const text = geminiResponse.text();
 
       res.json({ text });
     } catch (error: any) {
@@ -198,13 +191,11 @@ async function startServer() {
   });
 
   // Razorpay Order Creation
-  apiRouter.post("/create-order", async (req, res) => {
+  app.post("/api/create-order", async (req, res) => {
+    console.log("[SERVER] Handling POST /api/create-order");
     try {
       const { amount, currency = "INR" } = req.body;
-      
-      if (!razorpay) {
-        return res.status(500).json({ error: "Razorpay not initialized." });
-      }
+      if (!razorpay) return res.status(500).json({ error: "Razorpay not initialized." });
 
       const options = {
         amount: Math.round(amount),
@@ -221,10 +212,10 @@ async function startServer() {
   });
 
   // Razorpay Payment Verification
-  apiRouter.post("/verify-payment", async (req, res) => {
+  app.post("/api/verify-payment", async (req, res) => {
+    console.log("[SERVER] Handling POST /api/verify-payment");
     try {
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-      
       const secret = process.env.RAZORPAY_KEY_SECRET;
       if (!secret) return res.status(500).json({ error: "Missing secret" });
 
@@ -235,17 +226,13 @@ async function startServer() {
         .digest("hex");
 
       if (expectedSignature === razorpay_signature) {
-        // Meta Conversions API (CAPI) Tracking
         const { userData = {}, amount = 4900 } = req.body;
         const purchaseValue = Math.round(amount / 100);
-        
-        // This is async and non-blocking
         sendMetaEvent("Purchase", userData, {
           currency: "INR",
           value: purchaseValue,
           order_id: razorpay_order_id,
         }, req);
-
         res.json({ success: true });
       } else {
         res.status(400).json({ success: false });
@@ -255,8 +242,13 @@ async function startServer() {
     }
   });
 
-  // Register the API router
-  app.use("/api", apiRouter);
+  // Generic Tracking Endpoint
+  app.post("/api/track", (req, res) => {
+    const { eventName, userData = {}, customData = {} } = req.body;
+    if (!eventName) return res.status(400).json({ error: "eventName is required" });
+    sendMetaEvent(eventName, userData, customData, req);
+    res.json({ status: "queued" });
+  });
 
   // Serve static files or Vite middleware
   if (process.env.NODE_ENV !== "production") {
