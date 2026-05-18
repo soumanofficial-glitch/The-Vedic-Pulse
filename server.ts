@@ -166,7 +166,7 @@ async function startServer() {
         return res.status(400).json({ error: "Invalid contents provided" });
       }
 
-      console.log("[GEMINI] Generating content with model: gemini-3-flash-preview");
+      console.log("[GEMINI] Generating content with model: gemini-3-flash");
       
       if (!process.env.GEMINI_API_KEY) {
         console.error("[GEMINI] Missing GEMINI_API_KEY");
@@ -177,7 +177,7 @@ async function startServer() {
       const apiContents = Array.isArray(contents) ? contents : [{ role: 'user', parts: [{ text: String(contents) }] }];
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-3-flash",
         contents: apiContents,
         config: {
           systemInstruction: systemInstruction || "You are a helpful assistant.",
