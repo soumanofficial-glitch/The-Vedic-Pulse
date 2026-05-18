@@ -6,64 +6,39 @@ import cors from "cors";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-import { GoogleGenAI } from "@google/genai";
-
 // Handle potential ESM/CJS default import discrepancies
 const RazorpayConstructor = (Razorpay as any).default || Razorpay;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize Gemini - Using the recommended @google/genai SDK
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || "",
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
-  }
-});
-
-console.log("[SERVER] Starting server initialization...");
+console.log("[SERVER] Initializing server.ts...");
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // IMPORTANT: Middleware order matters. Define routes BEFORE Vite middleware.
+  // IMPORTANT: Middleware order matters
   app.use(cors());
   app.use(express.json());
 
-  // Request logging middleware - helpful for debugging 404s
+  // Request logging middleware
   app.use((req, res, next) => {
-    const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] ${req.method} ${req.url}`);
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
   });
 
   // Razorpay instance
-  let razorpay: any = null;
-  try {
-    const rzpKeyId = process.env.RAZORPAY_KEY_ID || "";
-    const rzpSecret = process.env.RAZORPAY_KEY_SECRET || "";
-    
-    if (rzpKeyId && rzpSecret) {
-      razorpay = new RazorpayConstructor({
-        key_id: rzpKeyId,
-        key_secret: rzpSecret,
-      });
-      console.log("[SERVER] Razorpay initialized");
-    } else {
-      console.warn("[SERVER] Razorpay credentials missing from environment");
-    }
-  } catch (err) {
-    console.error("[SERVER] Razorpay initialization failed:", err);
-  }
+  const razorpay = new RazorpayConstructor({
+    key_id: process.env.RAZORPAY_KEY_ID || "",
+    key_secret: process.env.RAZORPAY_KEY_SECRET || "",
+  });
 
   // Meta CAPI Helper
   const hash = (val: any) => {
     if (!val) return null;
     const clean = String(val).trim().toLowerCase();
+    // Return SHA256 hashed value as recommended by Meta
     return crypto.createHash("sha256").update(clean).digest("hex");
   };
 
@@ -83,6 +58,7 @@ async function startServer() {
     }
 
     try {
+      // Process user data - hash sensitive info if raw values are provided
       const processedUserData: any = {
         client_ip_address: req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress,
         client_user_agent: req.headers["user-agent"],
@@ -90,23 +66,30 @@ async function startServer() {
         fbp: getFBCookie(req, "_fbp"),
       };
 
+      // Fields that MUST be hashed according to Meta CAPI
       const fieldsToHash = ["em", "ph", "fn", "ln", "ge", "db", "ct", "st", "zp", "country", "external_id"];
       
+      // Copy other fields from userData and hash if needed
       Object.keys(userData).forEach(key => {
         const val = userData[key];
         if (!val) return;
+
         if (fieldsToHash.includes(key)) {
+          // If it's already an array, hash each element
           if (Array.isArray(val)) {
             processedUserData[key] = val.map(v => {
               const s = String(v);
+              // Avoid double hashing if it looks like a SHA256
               return (s.length === 64 && /^[0-9a-f]+$/i.test(s)) ? s : hash(s);
             });
           } else {
             const s = String(val);
+            // Avoid double hashing
             const hashedVal = (s.length === 64 && /^[0-9a-f]+$/i.test(s)) ? s : hash(s);
             processedUserData[key] = [hashedVal];
           }
         } else {
+          // Pass through non-hashed fields (like client_ip_address, fbp, etc. if provided in userData)
           processedUserData[key] = val;
         }
       });
@@ -131,63 +114,57 @@ async function startServer() {
       });
 
       const result = await response.json();
-      if (!response.ok) console.error("[META] API Error Response:", result);
+      if (!response.ok) {
+        console.error("[META] API Error Response:", result);
+      }
     } catch (error) {
       console.error("[META] Request failed:", error);
     }
   };
 
-  // Health check - define first for quick verification
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", node_env: process.env.NODE_ENV });
-  });
-
-  // Gemini Chat Endpoint
-  app.post("/api/chat", async (req, res) => {
-    console.log(`[SERVER] Handling POST /api/chat`);
-    try {
-      const { contents, systemInstruction } = req.body;
-      
-      if (!contents || !Array.isArray(contents)) {
-        return res.status(400).json({ error: "Invalid contents provided" });
-      }
-
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        return res.status(500).json({ error: "Gemini API key not configured in AI Studio Secrets." });
-      }
-
-      console.log("[GEMINI] Generating content with model: gemini-3-flash-preview");
-      
-      // Use the singleton client but ensure we have the key
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents,
-        config: {
-          systemInstruction: systemInstruction || "You are a helpful assistant.",
-          temperature: 0.7,
-        },
-      });
-
-      res.json({ text: response.text });
-    } catch (error: any) {
-      console.error("[GEMINI] Chat Error:", error);
-      res.status(500).json({ 
-        error: "Failed to generate content", 
-        details: error.message || String(error) 
-      });
+  // Generic Tracking Endpoint
+  app.post("/api/track", async (req, res) => {
+    const { eventName, userData = {}, customData = {} } = req.body;
+    if (!eventName) {
+      return res.status(400).json({ error: "eventName is required" });
     }
+    
+    // We run tracking in background to not block response
+    sendMetaEvent(eventName, userData, customData, req);
+    res.json({ status: "queued" });
   });
 
-  // Razorpay Order Creation
-  app.post("/api/create-order", async (req, res) => {
-    console.log("[SERVER] Handling POST /api/create-order");
+  // Health check
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", time: new Date().toISOString() });
+  });
+
+  // Debug route
+  app.get("/api/debug", (req, res) => {
+    const key = process.env.RAZORPAY_KEY_ID || "";
+    res.json({ 
+      message: "Payment API routes are registered",
+      env: process.env.NODE_ENV,
+      keyHint: key ? `${key.substring(0, 8)}...` : "missing"
+    });
+  });
+
+  // Create Razorpay Order
+  app.all("/api/create-order", async (req, res) => {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed. Use POST." });
+    }
     try {
       const { amount, currency = "INR" } = req.body;
-      if (!razorpay) return res.status(500).json({ error: "Razorpay not initialized." });
+      
+      console.log(`[PAYMENT] Creating order for amount: ${amount}`);
+
+      if (!amount || amount < 100) {
+        return res.status(400).json({ error: "Amount must be at least 100 paise" });
+      }
 
       const options = {
-        amount: Math.round(amount),
+        amount: Math.round(amount), // amount in paise
         currency,
         receipt: `receipt_${Date.now()}`,
       };
@@ -195,18 +172,26 @@ async function startServer() {
       const order = await razorpay.orders.create(options);
       res.json(order);
     } catch (error) {
-      console.error("[PAYMENT] Order Error:", error);
-      res.status(500).json({ error: "Failed to create order" });
+      console.error("[PAYMENT] Create Order Error:", error);
+      res.status(500).json({ error: "Failed to create Razorpay order", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
-  // Razorpay Payment Verification
+  // Verify Razorpay Signature
   app.post("/api/verify-payment", async (req, res) => {
-    console.log("[SERVER] Handling POST /api/verify-payment");
     try {
-      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userData = {} } = req.body;
+      
+      console.log(`[PAYMENT] Verifying payment for order: ${razorpay_order_id}`);
+
+      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        return res.status(400).json({ error: "Missing required payment fields" });
+      }
+
       const secret = process.env.RAZORPAY_KEY_SECRET;
-      if (!secret) return res.status(500).json({ error: "Missing secret" });
+      if (!secret) {
+        return res.status(500).json({ error: "Razorpay secret not configured" });
+      }
 
       const body = razorpay_order_id + "|" + razorpay_payment_id;
       const expectedSignature = crypto
@@ -215,40 +200,31 @@ async function startServer() {
         .digest("hex");
 
       if (expectedSignature === razorpay_signature) {
-        const { userData = {}, amount = 4900 } = req.body;
-        const purchaseValue = Math.round(amount / 100);
+        // Meta Conversions API (CAPI) Tracking
+        const purchaseValue = req.body.amount ? Math.round(req.body.amount / 100) : 9;
         sendMetaEvent("Purchase", userData, {
           currency: "INR",
           value: purchaseValue,
           order_id: razorpay_order_id,
         }, req);
-        res.json({ success: true });
+
+        res.json({ success: true, message: "Payment verified successfully" });
       } else {
-        res.status(400).json({ success: false });
+        res.status(400).json({ success: false, message: "Invalid signature" });
       }
     } catch (error) {
-      res.status(500).json({ error: "Verification failed" });
+      console.error("Razorpay Verification Error:", error);
+      res.status(500).json({ error: "Internal server error during verification" });
     }
   });
 
-  // Generic Tracking Endpoint
-  app.post("/api/track", (req, res) => {
-    const { eventName, userData = {}, customData = {} } = req.body;
-    if (!eventName) return res.status(400).json({ error: "eventName is required" });
-    sendMetaEvent(eventName, userData, customData, req);
-    res.json({ status: "queued" });
-  });
-
-  // Serve static files or Vite middleware
   if (process.env.NODE_ENV !== "production") {
-    console.log("[SERVER] Starting Vite in middleware mode...");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
-    console.log("[SERVER] Running in production mode...");
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
@@ -256,18 +232,9 @@ async function startServer() {
     });
   }
 
-  // Final catch-all for anything missed (not index.html or /api)
-  app.use((req, res) => {
-    console.warn(`[SERVER 404] No route matched for ${req.method} ${req.url}`);
-    res.status(404).send("Reality not found");
-  });
-
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server listening on http://0.0.0.0:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
   });
 }
 
-startServer().catch(err => {
-  console.error("[SERVER] Startup failed:", err);
-});
-
+startServer();
