@@ -251,7 +251,11 @@ export const ChatWithAstrologer = () => {
 
       // Build contents array for generateContent, ensuring it starts with 'user'
       const contents = [];
-      const chatMessages = [...messages, newUserMessage];
+      const chatMessages = [...messages, newUserMessage].filter(m => 
+        m.text && 
+        !m.text.includes("cosmic misalignment") && 
+        !m.text.includes("spiritual focus needs a brief moment")
+      );
       
       for (let i = 0; i < chatMessages.length; i++) {
         const msg = chatMessages[i];
@@ -294,10 +298,10 @@ export const ChatWithAstrologer = () => {
     } catch (error) {
       console.error("AI Error:", error);
       
-      let userMessage = "Om Namah Shivaya! I am sensing a temporary cosmic misalignment. Please wait a moment and ask again, my child.";
+      const errorStr = error instanceof Error ? error.message : String(error);
+      let userMessage = "Om Namah Shivaya! I am sensing a temporary cosmic misalignment. [" + errorStr + "] Please wait a moment and ask again, my child.";
       
       // Handle the specific Quota Exceeded error (429)
-      const errorStr = error instanceof Error ? error.message : String(error);
       if (errorStr.includes("429") || errorStr.includes("QUOTA_EXHAUSTED") || errorStr.includes("quota")) {
         userMessage = "Pranam beta. The cosmic energies are very intense right now and many seekers are reaching out. My spiritual focus needs a brief moment to recharge. Please try again in 15-20 seconds, or consider checking back later when the alignment is more silent. Kalyan ho!";
         

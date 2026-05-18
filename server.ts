@@ -160,10 +160,15 @@ async function startServer() {
         return res.status(400).json({ error: "Invalid contents provided" });
       }
 
-      console.log("[GEMINI] Generating content with model: gemini-3.1-flash-lite");
+      console.log("[GEMINI] Generating content with model: gemini-2.0-flash");
       
+      if (!process.env.GEMINI_API_KEY) {
+        console.error("[GEMINI] Missing GEMINI_API_KEY");
+        return res.status(500).json({ error: "Gemini API key not configured" });
+      }
+
       const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite",
+        model: "gemini-2.0-flash",
         contents,
         config: {
           systemInstruction: systemInstruction || "You are a helpful assistant.",
