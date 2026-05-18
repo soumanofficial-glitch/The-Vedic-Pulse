@@ -18,15 +18,6 @@ const razorpay = new RazorpayConstructor({
   key_secret: process.env.RAZORPAY_KEY_SECRET || "",
 });
 
-const genAI = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY || "",
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
-  }
-});
-
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
@@ -124,7 +115,21 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ error: "contents is required and must be an array" });
     }
 
-    const result = await genAI.models.generateContent({
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error("[CHAT] Missing GEMINI_API_KEY");
+      return res.status(500).json({ 
+        error: "Gemini API key is not configured.",
+        details: "Please add GEMINI_API_KEY to your environment variables." 
+      });
+    }
+
+    const ai = new GoogleGenAI({ 
+      apiKey,
+      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+    });
+
+    const result = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents,
       config: {

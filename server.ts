@@ -35,15 +35,6 @@ async function startServer() {
     key_secret: process.env.RAZORPAY_KEY_SECRET || "",
   });
 
-  const genAI = new GoogleGenAI({ 
-    apiKey: process.env.GEMINI_API_KEY || "",
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-      }
-    }
-  });
-
   // Meta CAPI Helper
   const hash = (val: any) => {
     if (!val) return null;
@@ -143,7 +134,21 @@ async function startServer() {
 
       console.log(`[CHAT] Processing request with ${contents.length} messages`);
 
-      const result = await genAI.models.generateContent({
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        console.error("[CHAT] Missing GEMINI_API_KEY");
+        return res.status(500).json({ 
+          error: "Gemini API key is not configured.",
+          details: "Please add GEMINI_API_KEY to your environment variables." 
+        });
+      }
+
+      const ai = new GoogleGenAI({ 
+        apiKey,
+        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      });
+
+      const result = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents,
         config: {

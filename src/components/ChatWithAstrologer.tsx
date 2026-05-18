@@ -294,15 +294,23 @@ export const ChatWithAstrologer = () => {
     } catch (error) {
       console.error("AI Error:", error);
       
-      let userMessage = "Om Namah Shivaya! I am sensing a temporary cosmic misalignment. Please wait a moment and ask again, my child.";
+      let userMessage = "Om Namah Shivaya! I am sensing a temporary cosmic misalignment in the celestial currents. Please give it a few moments and try again, my child.";
+      
+      const errorStr = error instanceof Error ? error.message : String(error);
       
       // Handle the specific Quota Exceeded error (429)
-      const errorStr = error instanceof Error ? error.message : String(error);
       if (errorStr.includes("429") || errorStr.includes("QUOTA_EXHAUSTED") || errorStr.includes("quota")) {
-        userMessage = "Pranam beta. The cosmic energies are very intense right now and many seekers are reaching out. My spiritual focus needs a brief moment to recharge. Please try again in 15-20 seconds, or consider checking back later when the alignment is more silent. Kalyan ho!";
-        
-        // Add a developer hint for the person building the app
-        console.warn("DEVELOPER HINT: You are hitting Gemini API quota limits. If you are building a production app, consider enabling billing in the AI Studio Settings > Secrets panel to increase your limits.");
+        userMessage = "Pranam beta. Many seekers are reaching out to the stars right now and the cosmic energies are very intense. My spiritual focus needs a brief moment to recharge. Please try again in 20-30 seconds, or check back a bit later. Kalyan ho!";
+        console.warn("DEVELOPER HINT: Quota limits reached. Enable billing in AI Studio to increase limits.");
+      } else if (errorStr.includes("API key")) {
+        userMessage = "Om Namah Shivaya. It seems some sacred configuration (API Key) is missing for our cosmic connection on this platform. Please ensure your host environment (Vercel) has the GEMINI_API_KEY set correctly. Kalyan ho!";
+      } else if (errorStr.includes("fetch")) {
+        userMessage = "I am unable to reach the celestial heavens. Please check your internet connection or try again later. The cosmic network is currently unstable.";
+      } else {
+        // Fallback with a bit more detail if it's a specific recognized error
+        if (errorStr && errorStr.length < 100 && !errorStr.includes("[object Object]")) {
+           userMessage = `Om Namah Shivaya. The stars whisper an obstacle: "${errorStr}". Please try again in a moment, my child.`;
+        }
       }
 
       const errorMessage: Message = {
