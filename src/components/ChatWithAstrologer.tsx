@@ -249,29 +249,26 @@ export const ChatWithAstrologer = () => {
         You are talking on 'The Vedic Pulse'. You represent the peak of spiritual guidance.
       `;
 
-      // Build contents array for generateContent, ensuring it starts with 'user'
+      // Build contents array for gemini-3-flash-preview following @google/genai guidelines
       const contents = [];
-      const chatMessages = [...messages, newUserMessage].filter(m => 
+      const chatMessages = messages.filter(m => 
         m.text && 
         !m.text.includes("cosmic misalignment") && 
         !m.text.includes("spiritual focus needs a brief moment")
       );
       
-      for (let i = 0; i < chatMessages.length; i++) {
-        const msg = chatMessages[i];
-        const role = msg.role === "user" ? "user" : "model";
-        
-        // Ensure valid sequence for Gemini [user, model, user, model...]
-        if (contents.length === 0 && role === "model") continue;
-        
-        // Skip duplicate roles if any exist by mistake
-        if (contents.length > 0 && contents[contents.length-1].role === role) continue;
-
+      for (const msg of chatMessages) {
         contents.push({
-          role,
+          role: msg.role === "user" ? "user" : "model",
           parts: [{ text: msg.text }]
         });
       }
+      
+      // Add current message
+      contents.push({
+        role: "user",
+        parts: [{ text: newUserMessage.text }]
+      });
 
       const response = await fetch("/api/chat", {
         method: "POST",

@@ -6,7 +6,7 @@ import cors from "cors";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 // Handle potential ESM/CJS default import discrepancies
 const RazorpayConstructor = (Razorpay as any).default || Razorpay;
@@ -14,8 +14,15 @@ const RazorpayConstructor = (Razorpay as any).default || Razorpay;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize Gemini - Using the official @google/generative-ai SDK
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+// Initialize Gemini - Using the recommended @google/genai SDK
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY || "",
+  httpOptions: {
+    headers: {
+      'User-Agent': 'aistudio-build',
+    }
+  }
+});
 
 console.log("[SERVER] Starting server initialization...");
 
@@ -23,7 +30,7 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // IMPORTANT: Middleware order matters
+  // IMPORTANT: Middleware order matters. Define routes BEFORE Vite middleware.
   app.use(cors());
   app.use(express.json());
 
@@ -130,7 +137,7 @@ async function startServer() {
     }
   };
 
-  // API Routes directly on app to avoid router nesting issues
+  // Health check - define first for quick verification
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", node_env: process.env.NODE_ENV });
   });
@@ -142,45 +149,27 @@ async function startServer() {
       const { contents, systemInstruction } = req.body;
       
       if (!contents || !Array.isArray(contents)) {
-        console.error("[SERVER] Invalid contents:", contents);
         return res.status(400).json({ error: "Invalid contents provided" });
       }
 
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
-        console.error("[GEMINI] Missing GEMINI_API_KEY in environment");
         return res.status(500).json({ error: "Gemini API key not configured in AI Studio Secrets." });
       }
 
-      console.log("[GEMINI] Generating content with model: gemini-1.5-flash");
+      console.log("[GEMINI] Generating content with model: gemini-3-flash-preview");
       
-      // Initialize the model inside the handler to ensure it uses the latest env vars
-      const genAIClient = new GoogleGenerativeAI(apiKey);
-      const model = genAIClient.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: systemInstruction || "You are a helpful assistant."
-      });
-
-      // Format contents for @google/generative-ai
-      const history = contents.slice(0, -1).map(c => ({
-        role: c.role === "model" ? "model" : "user",
-        parts: [{ text: c.parts[0].text }]
-      }));
-      
-      const lastMessage = contents[contents.length - 1].parts[0].text;
-
-      const chat = model.startChat({
-        history,
-        generationConfig: {
+      // Use the singleton client but ensure we have the key
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents,
+        config: {
+          systemInstruction: systemInstruction || "You are a helpful assistant.",
           temperature: 0.7,
         },
       });
 
-      const result = await chat.sendMessage(lastMessage);
-      const geminiResponse = await result.response;
-      const text = geminiResponse.text();
-
-      res.json({ text });
+      res.json({ text: response.text });
     } catch (error: any) {
       console.error("[GEMINI] Chat Error:", error);
       res.status(500).json({ 
