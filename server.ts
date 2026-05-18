@@ -158,7 +158,7 @@ async function startServer() {
   });
 
   // Gemini Chat Endpoint
-  app.post("/api/chat", async (req, res) => {
+  app.post("/api/v1/astrologer/chat", async (req, res) => {
     try {
       const { contents, systemInstruction } = req.body;
       
@@ -188,11 +188,14 @@ async function startServer() {
       const text = response.text || "The stars are a bit cloudy today. Please ask your question again, my child.";
 
       res.json({ text });
-    } catch (error) {
+    } catch (error: any) {
       console.error("[GEMINI] Chat Error Details:", error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       
-      res.status(500).json({ 
+      // Pass the actual status code if it's a Gemini error (like 429)
+      const status = error.status || error.statusCode || 500;
+      
+      res.status(status).json({ 
         error: "Failed to generate content", 
         details: errorMessage
       });
