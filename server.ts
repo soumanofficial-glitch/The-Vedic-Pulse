@@ -160,6 +160,8 @@ async function startServer() {
         return res.status(400).json({ error: "Invalid contents provided" });
       }
 
+      console.log("[GEMINI] Generating content with model: gemini-3.1-flash-lite");
+      
       const response = await ai.models.generateContent({
         model: "gemini-3.1-flash-lite",
         contents,
@@ -169,12 +171,16 @@ async function startServer() {
         },
       });
 
-      res.json({ text: response.text });
+      const text = response.text || "The stars are a bit cloudy today. Please ask your question again, my child.";
+
+      res.json({ text });
     } catch (error) {
-      console.error("[GEMINI] Chat Error:", error);
+      console.error("[GEMINI] Chat Error Details:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
       res.status(500).json({ 
         error: "Failed to generate content", 
-        details: error instanceof Error ? error.message : String(error) 
+        details: errorMessage
       });
     }
   });
