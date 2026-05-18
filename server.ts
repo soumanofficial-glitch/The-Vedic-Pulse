@@ -157,6 +157,11 @@ async function startServer() {
     res.json({ status: "ok", time: new Date().toISOString() });
   });
 
+  // Test route to verify API is alive
+  app.get("/api/chat", (req, res) => {
+    res.json({ message: "Chat API is alive. Please use POST." });
+  });
+
   // Gemini Chat Endpoint
   app.post("/api/chat", async (req, res) => {
     try {
@@ -166,7 +171,7 @@ async function startServer() {
         return res.status(400).json({ error: "Invalid contents provided" });
       }
 
-      console.log("[GEMINI] Generating content with model: gemini-3-flash");
+      console.log("[GEMINI] Generating content with model: gemini-1.5-flash");
       
       if (!process.env.GEMINI_API_KEY) {
         console.error("[GEMINI] Missing GEMINI_API_KEY");
@@ -177,7 +182,7 @@ async function startServer() {
       const apiContents = Array.isArray(contents) ? contents : [{ role: 'user', parts: [{ text: String(contents) }] }];
 
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash",
+        model: "gemini-1.5-flash",
         contents: apiContents,
         config: {
           systemInstruction: systemInstruction || "You are a helpful assistant.",
@@ -193,7 +198,7 @@ async function startServer() {
       const errorMessage = error instanceof Error ? error.message : String(error);
       
       // Pass the actual status code if it's a Gemini error (like 429)
-      const status = error.status || error.statusCode || 500;
+      const status = (error.status || error.statusCode || 500);
       
       res.status(status).json({ 
         error: "Failed to generate content", 
@@ -294,7 +299,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*all", (req, res) => {
+    app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
