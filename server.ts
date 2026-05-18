@@ -158,7 +158,7 @@ async function startServer() {
   });
 
   // Gemini Chat Endpoint
-  app.post("/api/v1/astrologer/chat", async (req, res) => {
+  app.post("/api/chat", async (req, res) => {
     try {
       const { contents, systemInstruction } = req.body;
       
@@ -294,7 +294,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    app.get("*all", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
