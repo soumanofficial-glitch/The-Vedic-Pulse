@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import cors from "cors";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { GoogleGenAI } from "@google/genai";
 
 // Handle potential ESM/CJS default import discrepancies
 const RazorpayConstructor = (Razorpay as any).default || Razorpay;
@@ -32,6 +33,15 @@ async function startServer() {
   const razorpay = new RazorpayConstructor({
     key_id: process.env.RAZORPAY_KEY_ID || "",
     key_secret: process.env.RAZORPAY_KEY_SECRET || "",
+  });
+
+  const genAI = new GoogleGenAI({ 
+    apiKey: process.env.GEMINI_API_KEY || "",
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      }
+    }
   });
 
   // Meta CAPI Helper
@@ -121,6 +131,36 @@ async function startServer() {
       console.error("[META] Request failed:", error);
     }
   };
+
+  // Chat API Endpoint
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { contents, systemInstruction } = req.body;
+      
+      if (!contents || !Array.isArray(contents)) {
+        return res.status(400).json({ error: "contents is required and must be an array" });
+      }
+
+      console.log(`[CHAT] Processing request with ${contents.length} messages`);
+
+      const result = await genAI.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents,
+        config: {
+          systemInstruction,
+          temperature: 0.8,
+        },
+      });
+
+      res.json({ text: result.text });
+    } catch (error) {
+      console.error("[CHAT] AI Error:", error);
+      res.status(500).json({ 
+        error: "Failed to generate AI response", 
+        details: error instanceof Error ? error.message : String(error) 
+      });
+    }
+  });
 
   // Generic Tracking Endpoint
   app.post("/api/track", async (req, res) => {

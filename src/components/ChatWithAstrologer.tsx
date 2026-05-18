@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { MessageCircle, X, Send, User, Sparkles, Clock, Lock, CreditCard, ChevronDown, Award, ShieldCheck, Users, Star, BookOpen, CheckCircle, Heart, Zap, Volume2, VolumeX } from "lucide-react";
-import { GoogleGenAI } from "@google/genai";
 // Using a high-quality, realistic portrait of a wise elderly Indian man for the astrologer
 const astrologerImg = "https://images.unsplash.com/photo-1601054704854-1a2e79dac4d3?q=80&w=800&auto=format&fit=crop";
 
@@ -228,9 +227,6 @@ export const ChatWithAstrologer = () => {
     setIsTyping(true);
     
     try {
-      // Re-initialize for each request as per skill recommendations for some environments
-      const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
-      
       const systemInstruction = `
         You are Acharya Shivanand, a senior Vedic Astrologer with 18+ years of experience.
         Your style is deeply human, warm, and traditional. You are NOT an AI assistant. You are a real person who cares.
@@ -253,7 +249,7 @@ export const ChatWithAstrologer = () => {
         You are talking on 'The Vedic Pulse'. You represent the peak of spiritual guidance.
       `;
 
-      // Build contents array for generateContent, ensuring it starts with 'user'
+      // Build contents array, ensuring it starts with 'user'
       const contents = [];
       const chatMessages = [...messages, newUserMessage];
       
@@ -273,16 +269,19 @@ export const ChatWithAstrologer = () => {
         });
       }
 
-      const result = await genAI.models.generateContent({
-        model: "gemini-3.1-flash-live-preview",
-        contents,
-        config: {
-          systemInstruction,
-          temperature: 0.8,
-        },
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents, systemInstruction }),
       });
 
-      const responseText = result.text || "The stars are a bit cloudy today. Please ask your question again, my child.";
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || "Failed to get AI response");
+      }
+
+      const data = await response.json();
+      const responseText = data.text || "The stars are a bit cloudy today. Please ask your question again, my child.";
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),

@@ -2,5 +2,7 @@
   "name": "The Vedic Pulse",
   "description": "Comprehensive Vedic Future Prediction Reports (2026-2030) and personalized astrology insights.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

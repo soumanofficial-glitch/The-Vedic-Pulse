@@ -18,6 +18,15 @@ const razorpay = new RazorpayConstructor({
   key_secret: process.env.RAZORPAY_KEY_SECRET || "",
 });
 
+const genAI = new GoogleGenAI({ 
+  apiKey: process.env.GEMINI_API_KEY || "",
+  httpOptions: {
+    headers: {
+      'User-Agent': 'aistudio-build',
+    }
+  }
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
@@ -103,6 +112,34 @@ app.post("/api/verify-payment", async (req, res) => {
   } catch (error) {
     console.error("Razorpay Verification Error:", error);
     res.status(500).json({ error: "Internal server error during verification" });
+  }
+});
+
+// Chat API Route (Vercel)
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { contents, systemInstruction } = req.body;
+    
+    if (!contents || !Array.isArray(contents)) {
+      return res.status(400).json({ error: "contents is required and must be an array" });
+    }
+
+    const result = await genAI.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents,
+      config: {
+        systemInstruction,
+        temperature: 0.8,
+      },
+    });
+
+    res.json({ text: result.text });
+  } catch (error) {
+    console.error("AI Error:", error);
+    res.status(500).json({ 
+      error: "Failed to generate AI response", 
+      details: error instanceof Error ? error.message : String(error) 
+    });
   }
 });
 
