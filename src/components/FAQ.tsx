@@ -16,7 +16,7 @@ const faqs = [
     answer: "Yes! Every report generated on our platform comes with a 'Download PDF' option. You can save your personalized Karmic Blueprint to your device for offline reading and future reference at no extra cost."
   },
   {
-    question: "Why are the reports priced so low (₹9 - ₹29)?",
+    question: "Why are the reports priced so low (₹9 - ₹49)?",
     answer: "Our mission is to make Vedic wisdom accessible to everyone. By using AI-enhanced calculation engines, we remove the high costs of traditional consultations while maintaining high accuracy, passing those savings directly to you."
   },
   {

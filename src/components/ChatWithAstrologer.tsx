@@ -13,7 +13,7 @@ interface Message {
 
 const FREE_TRIAL_DURATION_MS = 30 * 1000;
 const SESSION_DURATION_MS = 5 * 60 * 1000; // 5 minutes
-const PRICE_INR = 7;
+const PRICE_INR = 49;
 
 export const ChatWithAstrologer = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -421,7 +421,7 @@ export const ChatWithAstrologer = () => {
           1
         </span>
         <div className="absolute right-full mr-4 bg-white text-black px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
-           Chat with an Astrologer (30 SEC FREE)
+           Free Chat (FIRST 30 SEC FREE)
         </div>
       </button>
 
@@ -947,8 +947,11 @@ export const ChatWithAstrologer = () => {
 
                   <div className="grid grid-cols-2 gap-4 relative">
                     <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 group hover:border-amber-500/30 transition-colors">
-                      <div className="text-amber-500 font-black text-2xl">₹7</div>
-                      <div className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-1">Special Only!</div>
+                      <div className="flex items-baseline gap-2">
+                        <div className="text-amber-500 font-black text-2xl">₹49</div>
+                        <div className="text-sm text-gray-500 line-through font-bold opacity-50">₹75</div>
+                      </div>
+                      <div className="text-[10px] text-emerald-500 uppercase font-black tracking-widest mt-1">Limited Time Offer!</div>
                     </div>
                     <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 group hover:border-amber-500/30 transition-colors">
                       <div className="text-white font-black text-2xl">5 <span className="text-xs">min</span></div>
