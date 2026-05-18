@@ -6,7 +6,7 @@ import cors from "cors";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Handle potential ESM/CJS default import discrepancies
 const RazorpayConstructor = (Razorpay as any).default || Razorpay;
@@ -14,17 +14,10 @@ const RazorpayConstructor = (Razorpay as any).default || Razorpay;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize Gemini
-const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY || "", 
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
-  }
-});
+// Initialize Gemini - Using the official @google/generative-ai SDK
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-console.log("[SERVER] Initializing server.ts...");
+console.log("[SERVER] Starting server initialization...");
 
 async function startServer() {
   const app = express();
@@ -34,20 +27,28 @@ async function startServer() {
   app.use(cors());
   app.use(express.json());
 
-  // Request logging middleware
+  // Request logging middleware - helpful for debugging 404s
   app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] ${req.method} ${req.url}`);
     next();
   });
 
-  // Razorpay instance - wrap in try-catch to prevent server crash if keys are missing
+  // Razorpay instance
   let razorpay: any = null;
   try {
-    razorpay = new RazorpayConstructor({
-      key_id: process.env.RAZORPAY_KEY_ID || "",
-      key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-    });
-    console.log("[SERVER] Razorpay initialized");
+    const rzpKeyId = process.env.RAZORPAY_KEY_ID || "";
+    const rzpSecret = process.env.RAZORPAY_KEY_SECRET || "";
+    
+    if (rzpKeyId && rzpSecret) {
+      razorpay = new RazorpayConstructor({
+        key_id: rzpKeyId,
+        key_secret: rzpSecret,
+      });
+      console.log("[SERVER] Razorpay initialized");
+    } else {
+      console.warn("[SERVER] Razorpay credentials missing from environment");
+    }
   } catch (err) {
     console.error("[SERVER] Razorpay initialization failed:", err);
   }
@@ -56,7 +57,6 @@ async function startServer() {
   const hash = (val: any) => {
     if (!val) return null;
     const clean = String(val).trim().toLowerCase();
-    // Return SHA256 hashed value as recommended by Meta
     return crypto.createHash("sha256").update(clean).digest("hex");
   };
 
@@ -76,7 +76,6 @@ async function startServer() {
     }
 
     try {
-      // Process user data - hash sensitive info if raw values are provided
       const processedUserData: any = {
         client_ip_address: req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress,
         client_user_agent: req.headers["user-agent"],
@@ -84,30 +83,23 @@ async function startServer() {
         fbp: getFBCookie(req, "_fbp"),
       };
 
-      // Fields that MUST be hashed according to Meta CAPI
       const fieldsToHash = ["em", "ph", "fn", "ln", "ge", "db", "ct", "st", "zp", "country", "external_id"];
       
-      // Copy other fields from userData and hash if needed
       Object.keys(userData).forEach(key => {
         const val = userData[key];
         if (!val) return;
-
         if (fieldsToHash.includes(key)) {
-          // If it's already an array, hash each element
           if (Array.isArray(val)) {
             processedUserData[key] = val.map(v => {
               const s = String(v);
-              // Avoid double hashing if it looks like a SHA256
               return (s.length === 64 && /^[0-9a-f]+$/i.test(s)) ? s : hash(s);
             });
           } else {
             const s = String(val);
-            // Avoid double hashing
             const hashedVal = (s.length === 64 && /^[0-9a-f]+$/i.test(s)) ? s : hash(s);
             processedUserData[key] = [hashedVal];
           }
         } else {
-          // Pass through non-hashed fields (like client_ip_address, fbp, etc. if provided in userData)
           processedUserData[key] = val;
         }
       });
@@ -132,38 +124,30 @@ async function startServer() {
       });
 
       const result = await response.json();
-      if (!response.ok) {
-        console.error("[META] API Error Response:", result);
-      }
+      if (!response.ok) console.error("[META] API Error Response:", result);
     } catch (error) {
       console.error("[META] Request failed:", error);
     }
   };
 
+  // API Routes MUST be defined BEFORE Vite middleware
+  const apiRouter = express.Router();
+
   // Generic Tracking Endpoint
-  app.post("/api/track", async (req, res) => {
+  apiRouter.post("/track", (req, res) => {
     const { eventName, userData = {}, customData = {} } = req.body;
-    if (!eventName) {
-      return res.status(400).json({ error: "eventName is required" });
-    }
-    
-    // We run tracking in background to not block response
+    if (!eventName) return res.status(400).json({ error: "eventName is required" });
     sendMetaEvent(eventName, userData, customData, req);
     res.json({ status: "queued" });
   });
 
   // Health check
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", time: new Date().toISOString() });
-  });
-
-  // Test route to verify API is alive
-  app.get("/api/chat", (req, res) => {
-    res.json({ message: "Chat API is alive. Please use POST." });
+  apiRouter.get("/health", (req, res) => {
+    res.json({ status: "ok", node_env: process.env.NODE_ENV });
   });
 
   // Gemini Chat Endpoint
-  app.post("/api/chat", async (req, res) => {
+  apiRouter.post("/chat", async (req, res) => {
     try {
       const { contents, systemInstruction } = req.body;
       
@@ -171,72 +155,59 @@ async function startServer() {
         return res.status(400).json({ error: "Invalid contents provided" });
       }
 
-      console.log("[GEMINI] Generating content with model: gemini-1.5-flash");
+      console.log("[GEMINI] Generating content with model: gemini-3-flash");
       
       if (!process.env.GEMINI_API_KEY) {
-        console.error("[GEMINI] Missing GEMINI_API_KEY");
-        return res.status(500).json({ error: "Gemini API key not configured. Please check AI Studio Settings > Secrets." });
+        return res.status(500).json({ error: "Gemini API key not configured." });
       }
 
-      // Ensure contents is a clean array
-      const apiContents = Array.isArray(contents) ? contents : [{ role: 'user', parts: [{ text: String(contents) }] }];
+      // Initialize the model
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-3-flash",
+        systemInstruction: systemInstruction || "You are a helpful assistant."
+      });
 
-      const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: apiContents,
-        config: {
-          systemInstruction: systemInstruction || "You are a helpful assistant.",
+      // Format contents for @google/generative-ai
+      // It expects contents as an array of { role: 'user' | 'model', parts: [{ text: string }] }
+      const history = contents.slice(0, -1).map(c => ({
+        role: c.role === "model" ? "model" : "user",
+        parts: [{ text: c.parts[0].text }]
+      }));
+      
+      const lastMessage = contents[contents.length - 1].parts[0].text;
+
+      const chat = model.startChat({
+        history,
+        generationConfig: {
           temperature: 0.7,
         },
       });
 
-      const text = response.text || "The stars are a bit cloudy today. Please ask your question again, my child.";
+      const result = await chat.sendMessage(lastMessage);
+      const response = await result.response;
+      const text = response.text();
 
       res.json({ text });
     } catch (error: any) {
-      console.error("[GEMINI] Chat Error Details:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      // Pass the actual status code if it's a Gemini error (like 429)
-      const status = (error.status || error.statusCode || 500);
-      
-      res.status(status).json({ 
+      console.error("[GEMINI] Chat Error:", error);
+      res.status(500).json({ 
         error: "Failed to generate content", 
-        details: errorMessage
+        details: error.message || String(error) 
       });
     }
   });
 
-  // Debug route
-  app.get("/api/debug", (req, res) => {
-    const key = process.env.RAZORPAY_KEY_ID || "";
-    res.json({ 
-      message: "Payment API routes are registered",
-      env: process.env.NODE_ENV,
-      keyHint: key ? `${key.substring(0, 8)}...` : "missing"
-    });
-  });
-
-  // Create Razorpay Order
-  app.all("/api/create-order", async (req, res) => {
-    if (req.method !== "POST") {
-      return res.status(405).json({ error: "Method not allowed. Use POST." });
-    }
+  // Razorpay Order Creation
+  apiRouter.post("/create-order", async (req, res) => {
     try {
       const { amount, currency = "INR" } = req.body;
       
-      console.log(`[PAYMENT] Creating order for amount: ${amount}`);
-
       if (!razorpay) {
-        return res.status(500).json({ error: "Razorpay not initialized. Please check keys." });
-      }
-
-      if (!amount || amount < 100) {
-        return res.status(400).json({ error: "Amount must be at least 100 paise" });
+        return res.status(500).json({ error: "Razorpay not initialized." });
       }
 
       const options = {
-        amount: Math.round(amount), // amount in paise
+        amount: Math.round(amount),
         currency,
         receipt: `receipt_${Date.now()}`,
       };
@@ -244,26 +215,18 @@ async function startServer() {
       const order = await razorpay.orders.create(options);
       res.json(order);
     } catch (error) {
-      console.error("[PAYMENT] Create Order Error:", error);
-      res.status(500).json({ error: "Failed to create Razorpay order", details: error instanceof Error ? error.message : String(error) });
+      console.error("[PAYMENT] Order Error:", error);
+      res.status(500).json({ error: "Failed to create order" });
     }
   });
 
-  // Verify Razorpay Signature
-  app.post("/api/verify-payment", async (req, res) => {
+  // Razorpay Payment Verification
+  apiRouter.post("/verify-payment", async (req, res) => {
     try {
-      const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userData = {} } = req.body;
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
       
-      console.log(`[PAYMENT] Verifying payment for order: ${razorpay_order_id}`);
-
-      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-        return res.status(400).json({ error: "Missing required payment fields" });
-      }
-
       const secret = process.env.RAZORPAY_KEY_SECRET;
-      if (!secret) {
-        return res.status(500).json({ error: "Razorpay secret not configured" });
-      }
+      if (!secret) return res.status(500).json({ error: "Missing secret" });
 
       const body = razorpay_order_id + "|" + razorpay_payment_id;
       const expectedSignature = crypto
@@ -273,30 +236,38 @@ async function startServer() {
 
       if (expectedSignature === razorpay_signature) {
         // Meta Conversions API (CAPI) Tracking
-        const purchaseValue = req.body.amount ? Math.round(req.body.amount / 100) : 49;
+        const { userData = {}, amount = 4900 } = req.body;
+        const purchaseValue = Math.round(amount / 100);
+        
+        // This is async and non-blocking
         sendMetaEvent("Purchase", userData, {
           currency: "INR",
           value: purchaseValue,
           order_id: razorpay_order_id,
         }, req);
 
-        res.json({ success: true, message: "Payment verified successfully" });
+        res.json({ success: true });
       } else {
-        res.status(400).json({ success: false, message: "Invalid signature" });
+        res.status(400).json({ success: false });
       }
     } catch (error) {
-      console.error("Razorpay Verification Error:", error);
-      res.status(500).json({ error: "Internal server error during verification" });
+      res.status(500).json({ error: "Verification failed" });
     }
   });
 
+  // Register the API router
+  app.use("/api", apiRouter);
+
+  // Serve static files or Vite middleware
   if (process.env.NODE_ENV !== "production") {
+    console.log("[SERVER] Starting Vite in middleware mode...");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
+    console.log("[SERVER] Running in production mode...");
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
@@ -304,18 +275,18 @@ async function startServer() {
     });
   }
 
-  // Error handling middleware
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error("[SERVER ERROR]", err);
-    res.status(500).json({ 
-      error: "Internal Server Error", 
-      message: err.message || "Unknown error" 
-    });
+  // Final catch-all for anything missed (not index.html or /api)
+  app.use((req, res) => {
+    console.warn(`[SERVER 404] No route matched for ${req.method} ${req.url}`);
+    res.status(404).send("Reality not found");
   });
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server listening on http://0.0.0.0:${PORT}`);
   });
 }
 
-startServer();
+startServer().catch(err => {
+  console.error("[SERVER] Startup failed:", err);
+});
+
