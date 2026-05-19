@@ -130,7 +130,7 @@ app.post("/api/chat", async (req, res) => {
     });
 
     const result = await ai.models.generateContent({
-      model: "gemini-1.5-pro",
+      model: "gemini-3.1-flash-lite",
       contents,
       config: {
         systemInstruction,

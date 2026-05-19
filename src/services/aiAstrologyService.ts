@@ -27,7 +27,7 @@ export async function getDailyHoroscope(zodiac: string): Promise<DailyHoroscope>
   try {
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-pro",
+      model: "gemini-3.1-flash-lite",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -165,7 +165,7 @@ export async function generateAstrologyReport(details: BirthDetails, reportType:
   try {
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-pro",
+      model: "gemini-3.1-flash-lite",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
