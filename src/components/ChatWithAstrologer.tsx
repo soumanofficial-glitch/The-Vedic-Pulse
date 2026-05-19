@@ -190,7 +190,10 @@ export const ChatWithAstrologer = () => {
   // Scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth"
+      });
     }
   }, [messages, isTyping, isQueueing]);
 
@@ -275,12 +278,20 @@ export const ChatWithAstrologer = () => {
         body: JSON.stringify({ contents, systemInstruction }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || errorData.error || "Failed to get AI response");
+      let data;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error("Non-JSON response:", text);
+        throw new Error("The celestial connection returned an unexpected format. Please try again.");
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.details || data?.error || "Failed to get AI response");
+      }
+
       const responseText = data.text || "The stars are a bit cloudy today. Please ask your question again, my child.";
 
       const aiMessage: Message = {
@@ -301,16 +312,15 @@ export const ChatWithAstrologer = () => {
       // Handle the specific Quota Exceeded error (429)
       if (errorStr.includes("429") || errorStr.includes("QUOTA_EXHAUSTED") || errorStr.includes("quota")) {
         userMessage = "Pranam beta. Many seekers are reaching out to the stars right now and the cosmic energies are very intense. My spiritual focus needs a brief moment to recharge. Please try again in 20-30 seconds, or check back a bit later. Kalyan ho!";
-        console.warn("DEVELOPER HINT: Quota limits reached. Enable billing in AI Studio to increase limits.");
       } else if (errorStr.includes("API key")) {
-        userMessage = "Om Namah Shivaya. It seems some sacred configuration (API Key) is missing for our cosmic connection on this platform. Please ensure your host environment (Vercel) has the GEMINI_API_KEY set correctly. Kalyan ho!";
-      } else if (errorStr.includes("fetch")) {
-        userMessage = "I am unable to reach the celestial heavens. Please check your internet connection or try again later. The cosmic network is currently unstable.";
+        userMessage = "Om Namah Shivaya. It seems some sacred configuration is missing. Our cosmic gateway is temporarily closed. Please check back soon. Kalyan ho!";
+      } else if (errorStr.includes("fetch") || errorStr.includes("Failed to fetch")) {
+        userMessage = "I am unable to reach the celestial heavens. Please check your internet connection. The cosmic network is currently unstable.";
+      } else if (errorStr.includes("SAFETY") || errorStr.includes("blocked")) {
+        userMessage = "Beta, the stars are silent on this specific matter. The cosmic balance prevents me from providing guidance here. Please ask something else. Kalyan ho!";
       } else {
-        // Fallback with a bit more detail if it's a specific recognized error
-        if (errorStr && errorStr.length < 100 && !errorStr.includes("[object Object]")) {
-           userMessage = `Om Namah Shivaya. The stars whisper an obstacle: "${errorStr}". Please try again in a moment, my child.`;
-        }
+        // Fallback
+        userMessage = "Om Namah Shivaya. A spiritual cloud is passing over our connection. Let us wait for a moment and try again. Kalyan ho!";
       }
 
       const errorMessage: Message = {
@@ -948,7 +958,7 @@ export const ChatWithAstrologer = () => {
                   <div className="grid grid-cols-2 gap-4 relative">
                     <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 group hover:border-amber-500/30 transition-colors">
                       <div className="flex items-baseline gap-2">
-                        <div className="text-amber-500 font-black text-2xl">₹49</div>
+                        <div className="text-amber-500 font-black text-2xl">₹{PRICE_INR}</div>
                         <div className="text-sm text-gray-500 line-through font-bold opacity-50">₹75</div>
                       </div>
                       <div className="text-[10px] text-emerald-500 uppercase font-black tracking-widest mt-1">Limited Time Offer!</div>
@@ -990,7 +1000,7 @@ export const ChatWithAstrologer = () => {
                       type="text"
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                      onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                       placeholder="Ask your life question..."
                       className="flex-1 bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-[14px] text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500/50 transition-all focus:ring-4 focus:ring-amber-500/5"
                     />
