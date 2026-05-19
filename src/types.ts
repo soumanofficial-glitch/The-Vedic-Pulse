@@ -30,6 +30,17 @@ export interface AstrologyReport {
   nakshatraSymbol: string;
   nakshatraInfluence: string;
   nakshatraStrengths: string[];
+  // Love Compatibility specific fields
+  loveCompatibilityPercentage?: number;
+  emotionalBondPercentage?: number;
+  trustScore?: number;
+  marriagePotential?: string;
+  communicationMatch?: string;
+  physicalAttraction?: string;
+  emotionalOverview?: string;
+  breakupRiskIndicator?: string;
+  partner1Details?: BirthDetails;
+  partner2Details?: BirthDetails;
 }
 
 export interface DailyHoroscope {

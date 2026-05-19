@@ -26,6 +26,7 @@ import { ChatWithAstrologer } from "./components/ChatWithAstrologer";
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<{ id: string; price: number } | null>(null);
   const [userDetails, setUserDetails] = useState<BirthDetails | null>(null);
+  const [partner2Details, setPartner2Details] = useState<BirthDetails | null>(null);
   const [isPaying, setIsPaying] = useState(false);
   const [report, setReport] = useState<AstrologyReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +50,7 @@ export default function App() {
             const data = docSnap.data();
             setReport(data.reportData);
             setUserDetails(data.birthDetails);
+            if (data.partner2Details) setPartner2Details(data.partner2Details);
             
             // Clean up URL without refreshing
             const url = new URL(window.location.href);
@@ -83,8 +85,9 @@ export default function App() {
     });
   };
 
-  const handleFormSubmit = (details: BirthDetails) => {
+  const handleFormSubmit = (details: BirthDetails, partner2?: BirthDetails) => {
     setUserDetails(details);
+    if (partner2) setPartner2Details(partner2);
     setIsPaying(true);
   };
 
@@ -93,7 +96,11 @@ export default function App() {
     setIsLoading(true);
     try {
       if (userDetails && selectedProduct) {
-        const generatedReport = await generateAstrologyReport(userDetails, selectedProduct.id);
+        const generatedReport = await generateAstrologyReport(
+          userDetails, 
+          selectedProduct.id, 
+          selectedProduct.id === "love-compatibility" ? (partner2Details || undefined) : undefined
+        );
         setReport(generatedReport);
       }
     } catch (error) {
@@ -110,6 +117,7 @@ export default function App() {
   const resetFlow = () => {
     setSelectedProduct(null);
     setUserDetails(null);
+    setPartner2Details(null);
     setIsPaying(false);
     setReport(null);
   };

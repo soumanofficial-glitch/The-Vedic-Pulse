@@ -20,12 +20,12 @@ import {
 
 const PRODUCTS = [
   {
-    id: "present-life",
-    icon: <Sparkles className="text-amber-400" />,
-    title: "Prarabdha Karma Reading",
-    desc: "A deep dive into your current life path, karma, and immediate destiny.",
-    price: 3,
-    originalPrice: 29,
+    id: "love-compatibility",
+    icon: <Heart className="text-rose-500" />,
+    title: "Love Compatibility (100% Accurate)",
+    desc: "Discover emotional compatibility, attraction levels, and relationship energy.",
+    price: 9,
+    originalPrice: 85,
     time: "Instant"
   },
   {
@@ -45,15 +45,6 @@ const PRODUCTS = [
     price: 29,
     originalPrice: 99,
     time: "2 Mins"
-  },
-  {
-    id: "love-compatibility",
-    icon: <Heart className="text-rose-500" />,
-    title: "Love Compatibility Snapshot",
-    desc: "Discover emotional compatibility, attraction levels, and relationship energy.",
-    price: 19,
-    originalPrice: 79,
-    time: "Instant"
   },
   {
     id: "numerology-destiny",

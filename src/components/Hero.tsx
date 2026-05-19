@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "motion/react";
-import { ShieldCheck, Star, Users, Zap, Sparkles, MessageCircle } from "lucide-react";
+import { ShieldCheck, Star, Users, Zap, Sparkles, MessageCircle, Heart } from "lucide-react";
 
 // Import user avatars
 import user1 from "../assets/images/regenerated_image_1778676739185.png";
@@ -30,16 +30,16 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
 
           <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
             <button 
-              onClick={() => onSelect ? onSelect("present-life", 3) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => onSelect ? onSelect("love-compatibility", 9) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
               className="px-6 py-5 bg-amber-500 text-black font-black rounded-2xl hover:bg-white active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(245,158,11,0.4)] group"
             >
               <div className="flex items-center gap-1.5 mb-0.5">
-                <Sparkles className="w-3.5 h-3.5 fill-current animate-pulse text-black" />
-                <span>Life & Karma Reading</span>
+                <Heart className="w-3.5 h-3.5 fill-current animate-pulse text-black" />
+                <span>Love Compatibility 100% accurate</span>
               </div>
               <div className="flex items-center gap-2">
-                 <span className="opacity-40 line-through text-[10px]">₹29</span>
-                 <span className="text-lg">₹3 Only!</span>
+                 <span className="opacity-40 line-through text-[10px]">₹85</span>
+                 <span className="text-lg">₹9 Only!</span>
               </div>
               <div className="bg-black/5 px-2 py-0.5 rounded-full border border-black/5 flex items-center gap-1 mt-1">
                  <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />

@@ -20,7 +20,8 @@ import {
   Flame,
   CheckCircle2,
   Calendar,
-  Layers
+  Layers,
+  AlertCircle
 } from "lucide-react";
 import { AstrologyReport, BirthDetails } from "../types";
 
@@ -33,7 +34,8 @@ export const ReportDashboard = ({
   details: BirthDetails;
   onClose: () => void;
 }) => {
-  const [activeTab, setActiveTab] = useState<"overview" | "nakshatra" | "planetary" | "life" | "remedies">("overview");
+  const isLoveReport = !!report.loveCompatibilityPercentage;
+  const [activeTab, setActiveTab] = useState<"overview" | "nakshatra" | "planetary" | "life" | "remedies" | "compatibility">(isLoveReport ? "compatibility" : "overview");
   const [isGenerating, setIsGenerating] = useState(false);
   const [shareStatus, setShareStatus] = useState<"idle" | "sharing" | "shared">("idle");
   const [shareUrl, setShareUrl] = useState<string>("");
@@ -47,8 +49,8 @@ export const ReportDashboard = ({
       if (navigator.share) {
         try {
           await navigator.share({
-            title: `Karmic Blueprint for ${details.name}`,
-            text: `Check out my Vedic Astrology Report from The Vedic Pulse!`,
+            title: isLoveReport ? `Soul Match: ${report.partner1Details?.name} & ${report.partner2Details?.name}` : `Karmic Blueprint for ${details.name}`,
+            text: isLoveReport ? `Check out our Love Compatibility Report from The Vedic Pulse!` : `Check out my Vedic Astrology Report from The Vedic Pulse!`,
             url: shareUrl,
           });
           return;
@@ -67,6 +69,7 @@ export const ReportDashboard = ({
       const docRef = await addDoc(collection(db, "shared_reports"), {
         reportData: report,
         birthDetails: details,
+        partner2Details: report.partner2Details || null,
         createdAt: serverTimestamp(),
       });
       
@@ -74,11 +77,14 @@ export const ReportDashboard = ({
       setShareUrl(newShareUrl);
       setShareStatus("shared");
       
+      const shareTitle = isLoveReport ? `Soul Match: ${report.partner1Details?.name} & ${report.partner2Details?.name}` : `Karmic Blueprint for ${details.name}`;
+      const shareText = isLoveReport ? `Check out our Love Compatibility Report from The Vedic Pulse!` : `Check out my Vedic Astrology Report from The Vedic Pulse!`;
+
       if (navigator.share) {
         try {
           await navigator.share({
-            title: `Karmic Blueprint for ${details.name}`,
-            text: `Check out my Vedic Astrology Report from The Vedic Pulse!`,
+            title: shareTitle,
+            text: shareText,
             url: newShareUrl,
           });
         } catch (err) {
@@ -205,53 +211,86 @@ export const ReportDashboard = ({
               </div>
             </div>
           </motion.div>
-          <h1 className="font-serif text-5xl md:text-6xl text-white mb-4 italic">The Bhrigu Samhita Analysis</h1>
-          <p className="text-gold/60 font-mono text-sm tracking-[0.4em] uppercase mb-8">Detailed Karmic Blueprint for {details.name}</p>
+          <h1 className="font-serif text-5xl md:text-6xl text-white mb-4 italic">
+            {isLoveReport ? "The Soul Match Analysis" : "The Bhrigu Samhita Analysis"}
+          </h1>
+          <p className="text-gold/60 font-mono text-sm tracking-[0.4em] uppercase mb-8">
+            {isLoveReport 
+              ? `Unified Path for ${report.partner1Details?.name} & ${report.partner2Details?.name}`
+              : `Detailed Karmic Blueprint for ${details.name}`}
+          </p>
           <div className="flex flex-wrap justify-center gap-6 text-[10px] font-black uppercase tracking-widest text-gray-500">
-            <div className="flex items-center gap-2 border-r border-white/10 pr-6"><span>DOB: {details.dob}</span></div>
-            <div className="flex items-center gap-2 border-r border-white/10 pr-6"><span>TOB: {details.tob}</span></div>
-            <div className="flex items-center gap-2"><span>POB: {details.pob}</span></div>
+            <div className="flex items-center gap-2 border-r border-white/10 pr-6 group">
+               <span className="text-white/20 group-hover:text-amber-500 transition-colors">P1:</span>
+               <span>{report.partner1Details?.dob}</span>
+            </div>
+            {isLoveReport && (
+              <div className="flex items-center gap-2 border-r border-white/10 pr-6 group">
+                <span className="text-white/20 group-hover:text-rose-500 transition-colors">P2:</span>
+                <span>{report.partner2Details?.dob}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2"><span>System: Vedic AI</span></div>
           </div>
         </div>
 
         {/* Global Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-           <div className="glass-card p-8 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent">
+           <div className={`glass-card p-8 bg-gradient-to-br via-transparent to-transparent ${isLoveReport ? 'from-rose-500/10' : 'from-amber-500/10'}`}>
               <div className="flex justify-between items-start mb-6">
-                <Compass className="text-amber-500 w-6 h-6" />
-                <span className="text-[10px] font-black text-amber-500/50 uppercase tracking-widest">Alignment</span>
+                <Heart className={`${isLoveReport ? 'text-rose-500' : 'text-amber-500'} w-6 h-6`} />
+                <span className={`text-[10px] font-black uppercase tracking-widest ${isLoveReport ? 'text-rose-500/50' : 'text-amber-500/50'}`}>
+                  {isLoveReport ? 'Union Score' : 'Alignment'}
+                </span>
               </div>
-              <div className="text-4xl font-black text-white mb-2 italic">#{report.luckyNumber}</div>
-              <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">{report.luckyColor} Energy</div>
+              <div className="text-4xl font-black text-white mb-2 italic">
+                {isLoveReport ? `${report.loveCompatibilityPercentage}%` : `#${report.luckyNumber}`}
+              </div>
+              <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                {isLoveReport ? 'Compatibility' : `${report.luckyColor} Energy`}
+              </div>
            </div>
 
-           <div className="glass-card p-8 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent">
+           <div className={`glass-card p-8 bg-gradient-to-br via-transparent to-transparent ${isLoveReport ? 'from-purple-500/10' : 'from-indigo-500/10'}`}>
               <div className="flex justify-between items-start mb-6">
-                <Flame className="text-indigo-400 w-6 h-6" />
-                <span className="text-[10px] font-black text-indigo-400/50 uppercase tracking-widest">Luck Quotient</span>
+                <Flame className={`${isLoveReport ? 'text-purple-400' : 'text-indigo-400'} w-6 h-6`} />
+                <span className={`text-[10px] font-black uppercase tracking-widest ${isLoveReport ? 'text-purple-400/50' : 'text-indigo-400/50'}`}>
+                  {isLoveReport ? 'Bond Strength' : 'Luck Quotient'}
+                </span>
               </div>
-              <div className="text-4xl font-black text-white mb-2 italic">{report.luckScore}%</div>
-              <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">Auspicious Transit</div>
+              <div className="text-4xl font-black text-white mb-2 italic">
+                {isLoveReport ? `${report.emotionalBondPercentage}%` : `${report.luckScore}%`}
+              </div>
+              <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                {isLoveReport ? 'Emotional Sync' : 'Auspicious Transit'}
+              </div>
            </div>
 
-           <div className="glass-card p-8 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent">
+           <div className={`glass-card p-8 bg-gradient-to-br via-transparent to-transparent ${isLoveReport ? 'from-emerald-500/10' : 'from-emerald-500/10'}`}>
               <div className="flex justify-between items-start mb-6">
-                <Zap className="text-emerald-400 w-6 h-6" />
-                <span className="text-[10px] font-black text-emerald-400/50 uppercase tracking-widest">Prana Level</span>
+                <ShieldCheck className="text-emerald-400 w-6 h-6" />
+                <span className="text-[10px] font-black text-emerald-400/50 uppercase tracking-widest">
+                  {isLoveReport ? 'Trust Factor' : 'Prana Level'}
+                </span>
               </div>
-              <div className="text-4xl font-black text-white mb-2 italic">{report.energyScore}%</div>
-              <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">Vitality Index</div>
+              <div className="text-4xl font-black text-white mb-2 italic">
+                {isLoveReport ? `${report.trustScore}%` : `${report.energyScore}%`}
+              </div>
+              <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                {isLoveReport ? 'Loyalty Index' : 'Vitality Index'}
+              </div>
            </div>
         </div>
 
         {/* Navigation Tabs */}
         <div className="flex flex-wrap gap-2 mb-12 border-b border-white/5 pb-4">
           {[
-            { id: "overview", label: "Executive Summary", icon: <Star size={14} /> },
+            ...(isLoveReport ? [{ id: "compatibility", label: "Soul Match", icon: <Heart size={14} /> }] : []),
+            { id: "overview", label: "Karmic Outlook", icon: <Star size={14} /> },
             { id: "nakshatra", label: "Celestial Power", icon: <Flame size={14} /> },
-            { id: "planetary", label: "Planetary Transits", icon: <Layers size={14} /> },
+            { id: "planetary", label: "Transits", icon: <Layers size={14} /> },
             { id: "life", label: "Life Chapters", icon: <Compass size={14} /> },
-            { id: "remedies", label: "Remedial Sadhana", icon: <ShieldCheck size={14} /> }
+            { id: "remedies", label: "Remedies", icon: <ShieldCheck size={14} /> }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -276,6 +315,43 @@ export const ReportDashboard = ({
             exit={{ opacity: 0, y: -10 }}
             className="space-y-12"
           >
+            {activeTab === "compatibility" && isLoveReport && (
+              <div className="space-y-12">
+                <Section title="Spiritual Union Overview" icon={<Heart className="text-rose-500" />}>
+                  <p className="text-xl text-gray-300 font-serif italic border-l-2 border-rose-500/30 pl-8 leading-relaxed">
+                    {report.emotionalOverview}
+                  </p>
+                </Section>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <MetricCard 
+                    label="Marriage Potential" 
+                    value={report.marriagePotential || "Moderate"} 
+                    icon={<Star className="text-amber-400" />} 
+                  />
+                  <MetricCard 
+                    label="Communication Match" 
+                    value={report.communicationMatch || "Intellectual"} 
+                    icon={<Zap className="text-cyan-400" />} 
+                  />
+                  <MetricCard 
+                    label="Physical Attraction" 
+                    value={report.physicalAttraction || "Magnetic"} 
+                    icon={<Flame className="text-rose-400" />} 
+                  />
+                </div>
+
+                <div className="p-8 bg-rose-500/5 border border-rose-500/10 rounded-3xl relative overflow-hidden group">
+                  <div className="absolute top-4 right-8">
+                     <AlertCircle className="text-rose-500/20" size={80} />
+                  </div>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-2">Breakup Risk Indicator</h4>
+                  <p className="text-xl font-serif text-white italic relative z-10">{report.breakupRiskIndicator}</p>
+                  <p className="text-xs text-gray-400 mt-4 max-w-xl">Based on Guna Milan analysis and planetary aspects (Drishti) of Mars and Saturn on the 7th house.</p>
+                </div>
+              </div>
+            )}
+
             {activeTab === "overview" && (
               <div className="space-y-12">
                 <div className="grid md:grid-cols-2 gap-8">
@@ -551,6 +627,18 @@ const Section = ({ title, children, icon, variant = "full" }: { title: string; c
       {icon} {title}
     </h3>
     {children}
+  </div>
+);
+
+const MetricCard = ({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) => (
+  <div className="glass-card p-6 bg-white/5 border-white/5">
+    <div className="flex items-center gap-3 mb-4">
+      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/10">
+        {icon}
+      </div>
+      <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{label}</span>
+    </div>
+    <div className="text-lg font-serif text-white italic">{value}</div>
   </div>
 );
 

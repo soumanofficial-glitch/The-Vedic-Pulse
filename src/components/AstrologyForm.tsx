@@ -10,15 +10,53 @@ export const AstrologyForm = ({
   productId 
 }: { 
   onClose: () => void; 
-  onSubmit: (details: BirthDetails) => void;
+  onSubmit: (details: BirthDetails, partner2?: BirthDetails) => void;
   productId: string;
 }) => {
+  const isLoveReport = productId === "love-compatibility";
   const [formData, setFormData] = useState<BirthDetails>({
     name: "",
     dob: "",
     tob: "",
     pob: ""
   });
+
+  const [partner2Data, setPartner2Data] = useState<BirthDetails>({
+    name: "",
+    dob: "",
+    tob: "",
+    pob: ""
+  });
+
+  const [activePartner, setActivePartner] = useState<1 | 2>(1);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (isLoveReport && activePartner === 1) {
+      setActivePartner(2);
+      return;
+    }
+
+    // Split name for better Meta CAPI matching
+    const nameParts = formData.name.trim().split(/\s+/);
+    const fn = nameParts[0];
+    const ln = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
+    trackMetaEvent("InitiateCheckout", {
+      fn: fn,
+      ln: ln,
+    }, {
+      content_ids: [productId],
+      content_type: "product"
+    });
+    
+    if (isLoveReport) {
+      onSubmit(formData, partner2Data);
+    } else {
+      onSubmit(formData);
+    }
+  };
 
   return (
     <motion.div 
@@ -38,68 +76,130 @@ export const AstrologyForm = ({
           <X size={24} />
         </button>
 
-        <h2 className="text-3xl font-bold mb-2 text-amber-200">Janam Kundli Details</h2>
-        <p className="text-gray-400 text-sm mb-8 leading-relaxed">Exact birth details are essential for precise calculation of your Nakshatras, Grahas and Mahadashas.</p>
+        <h2 className="text-3xl font-bold mb-2 text-amber-200">
+          {isLoveReport ? "Compatibility Details" : "Janam Kundli Details"}
+        </h2>
+        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+          {isLoveReport 
+            ? "Enter birth details of both partners for a deep spiritual compatibility analysis."
+            : "Exact birth details are essential for precise calculation of your Nakshatras, Grahas and Mahadashas."}
+        </p>
 
-        <form className="space-y-6" onSubmit={(e) => {
-          e.preventDefault();
-          
-          // Split name for better Meta CAPI matching
-          const nameParts = formData.name.trim().split(/\s+/);
-          const fn = nameParts[0];
-          const ln = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
-
-          trackMetaEvent("InitiateCheckout", {
-            fn: fn,
-            ln: ln,
-          }, {
-            content_ids: [productId],
-            content_type: "product"
-          });
-          onSubmit(formData);
-        }}>
-          <div className="space-y-4">
-            <InputField 
-              icon={<User size={18} />} 
-              label="Full Name" 
-              placeholder="e.g. Rahul Sharma"
-              value={formData.name}
-              onChange={(v) => setFormData({...formData, name: v})}
-              required
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <InputField 
-                icon={<Calendar size={18} />} 
-                label="Birth Date" 
-                type="date"
-                value={formData.dob}
-                onChange={(v) => setFormData({...formData, dob: v})}
-                required
-              />
-              <InputField 
-                icon={<Clock size={18} />} 
-                label="Birth Time" 
-                type="time"
-                value={formData.tob}
-                onChange={(v) => setFormData({...formData, tob: v})}
-                required
-              />
-            </div>
-            <InputField 
-              icon={<MapPin size={18} />} 
-              label="Birth Place" 
-              placeholder="e.g. Mumbai, India"
-              value={formData.pob}
-              onChange={(v) => setFormData({...formData, pob: v})}
-              required
-            />
+        {isLoveReport && (
+          <div className="flex gap-2 mb-6 p-1 bg-white/5 rounded-xl border border-white/5">
+            <button 
+              onClick={() => setActivePartner(1)}
+              className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${activePartner === 1 ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-gray-500 hover:text-white'}`}
+            >
+              Partner 1 (You)
+            </button>
+            <button 
+              onClick={() => {
+                if (formData.name && formData.dob) {
+                  setActivePartner(2);
+                }
+              }}
+              className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${activePartner === 2 ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'text-gray-500 hover:text-white'}`}
+            >
+              Partner 2
+            </button>
           </div>
+        )}
+
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activePartner}
+              initial={{ opacity: 0, x: activePartner === 1 ? -10 : 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: activePartner === 1 ? 10 : -10 }}
+              className="space-y-4"
+            >
+              {activePartner === 1 ? (
+                <>
+                  <InputField 
+                    icon={<User size={18} />} 
+                    label="Full Name" 
+                    placeholder="e.g. Rahul Sharma"
+                    value={formData.name}
+                    onChange={(v) => setFormData({...formData, name: v})}
+                    required
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputField 
+                      icon={<Calendar size={18} />} 
+                      label="Birth Date" 
+                      type="date"
+                      value={formData.dob}
+                      onChange={(v) => setFormData({...formData, dob: v})}
+                      required
+                    />
+                    <InputField 
+                      icon={<Clock size={18} />} 
+                      label="Birth Time" 
+                      type="time"
+                      value={formData.tob}
+                      onChange={(v) => setFormData({...formData, tob: v})}
+                      required
+                    />
+                  </div>
+                  <InputField 
+                    icon={<MapPin size={18} />} 
+                    label="Birth Place" 
+                    placeholder="e.g. Mumbai, India"
+                    value={formData.pob}
+                    onChange={(v) => setFormData({...formData, pob: v})}
+                    required
+                  />
+                </>
+              ) : (
+                <>
+                  <InputField 
+                    icon={<User size={18} />} 
+                    label="Partner's Name" 
+                    placeholder="e.g. Simran Kaur"
+                    value={partner2Data.name}
+                    onChange={(v) => setPartner2Data({...partner2Data, name: v})}
+                    required
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputField 
+                      icon={<Calendar size={18} />} 
+                      label="Birth Date" 
+                      type="date"
+                      value={partner2Data.dob}
+                      onChange={(v) => setPartner2Data({...partner2Data, dob: v})}
+                      required
+                    />
+                    <InputField 
+                      icon={<Clock size={18} />} 
+                      label="Birth Time" 
+                      type="time"
+                      value={partner2Data.tob}
+                      onChange={(v) => setPartner2Data({...partner2Data, tob: v})}
+                      required
+                    />
+                  </div>
+                  <InputField 
+                    icon={<MapPin size={18} />} 
+                    label="Birth Place" 
+                    placeholder="e.g. Delhi, India"
+                    value={partner2Data.pob}
+                    onChange={(v) => setPartner2Data({...partner2Data, pob: v})}
+                    required
+                  />
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
 
           <button 
             type="submit"
-            className="btn-primary w-full text-sm mt-4 flex items-center justify-center gap-2"
+            className={`w-full py-4 text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all flex items-center justify-center gap-2 mt-4 shadow-xl active:scale-95 ${activePartner === 2 ? 'bg-rose-500 text-white hover:bg-rose-400 shadow-rose-500/20' : 'bg-amber-500 text-black hover:bg-amber-400 shadow-amber-500/20'}`}
           >
-            Generate My Vedic Report
+            {isLoveReport 
+              ? (activePartner === 1 ? "Next: Partner Details" : "Match Our Souls") 
+              : "Generate My Vedic Report"}
           </button>
           
           <p className="text-[10px] text-center text-gray-500 italic uppercase tracking-[0.2em] font-bold">
