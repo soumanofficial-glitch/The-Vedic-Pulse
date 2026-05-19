@@ -22,7 +22,7 @@ const PRODUCTS = [
   {
     id: "love-compatibility",
     icon: <Heart className="text-rose-500" />,
-    title: "Love Compatibility (100% Accurate)",
+    title: "Love Compatibility Analysis",
     desc: "Discover emotional compatibility, attraction levels, and relationship energy.",
     price: 9,
     originalPrice: 85,
