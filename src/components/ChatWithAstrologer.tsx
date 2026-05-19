@@ -315,7 +315,7 @@ export const ChatWithAstrologer = () => {
       } else if (errorStr.includes("API key")) {
         userMessage = "Om Namah Shivaya. It seems some sacred configuration is missing. Our cosmic gateway is temporarily closed. Please check back soon. Kalyan ho!";
       } else if (errorStr.includes("fetch") || errorStr.includes("Failed to fetch")) {
-        userMessage = "I am unable to reach the celestial heavens. Please check your internet connection. The cosmic network is currently unstable.";
+        userMessage = "I am unable to reach the celestial heavens at this moment. The spiritual pathways are temporarily clouded. Please try again after a brief meditation.";
       } else if (errorStr.includes("SAFETY") || errorStr.includes("blocked")) {
         userMessage = "Beta, the stars are silent on this specific matter. The cosmic balance prevents me from providing guidance here. Please ask something else. Kalyan ho!";
       } else {

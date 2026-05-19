@@ -110,12 +110,12 @@ export const PaymentFlow = ({
               setTimeout(onSuccess, 2000);
             } else {
               setStep("error");
-              setErrorMessage(verificationResult.message || "Payment verification failed");
+              setErrorMessage("The sacred energy exchange encountered an obstacle. Please try again in a moment.");
             }
           } catch (error) {
             console.error("Verification Error:", error);
             setStep("error");
-            setErrorMessage("An error occurred during verification");
+            setErrorMessage("The spiritual verification paths are temporarily blocked. Let us wait and try again.");
           }
         },
         prefill: {
@@ -136,12 +136,12 @@ export const PaymentFlow = ({
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', (response: any) => {
         setStep("error");
-        setErrorMessage(response.error.description || "Payment failed");
+        setErrorMessage("The transaction could not be completed by the stars. Please try another method.");
       });
       rzp.open();
     } catch (error: any) {
       console.error("Checkout Error:", error);
-      setErrorMessage(error.message || "Could not initialize payment");
+      setErrorMessage("I could not open the celestial portal for this offering. Please check your connection to the physical world.");
       setLoading(false);
     }
   };

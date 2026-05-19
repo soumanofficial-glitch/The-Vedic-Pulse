@@ -27,7 +27,7 @@ export async function getDailyHoroscope(zodiac: string): Promise<DailyHoroscope>
   try {
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-1.5-pro",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -165,7 +165,7 @@ export async function generateAstrologyReport(details: BirthDetails, reportType:
   try {
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-1.5-pro",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -234,10 +234,20 @@ export async function generateAstrologyReport(details: BirthDetails, reportType:
   } catch (error: any) {
     console.error("Error generating report:", error);
     
-    if (error.message?.includes("API_KEY") || error.message?.includes("not valid")) {
-      throw new Error("Gemini API key is invalid or not found. Please check your Settings > Secrets.");
+    const errorStr = error.message || String(error);
+    
+    if (errorStr.includes("API_KEY") || errorStr.includes("not valid")) {
+      throw new Error("Om Namah Shivaya. The celestial portal is temporarily unresponsive due to a misalignment in our sacred configuration. Please try again soon.");
+    }
+
+    if (errorStr.includes("quota") || errorStr.includes("429") || errorStr.includes("QUOTA_EXHAUSTED")) {
+      throw new Error("Pranam. Many seekers are currently consulting the stars, causing a powerful cosmic congestion. Please wait for a few moments and try your request again.");
+    }
+
+    if (errorStr.includes("fetch") || errorStr.includes("network")) {
+      throw new Error("I am unable to reach the higher realms at this moment. The spiritual link is currently faint. Please ensure your path is clear and try again.");
     }
     
-    throw error;
+    throw new Error("Om Namah Shivaya. A spiritual cloud has temporarily obscured the heavens. Please try again in a few moments, my child.");
   }
 }
