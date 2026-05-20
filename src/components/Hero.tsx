@@ -20,8 +20,8 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
         <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
           <div className="space-y-4">
              <span className="badge-amber">Making Astrology Accessible for everyone</span>
-             <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tight bg-gradient-to-b from-white via-white to-gray-500 bg-clip-text text-transparent">
-               100% Accurate prediction <br/> <span className="text-amber-400">Janam Kundli Report</span>
+             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.15] tracking-tight bg-gradient-to-b from-white via-white to-gray-400 bg-clip-text text-transparent">
+               India’s First Personalized <br/> <span className="text-amber-400">Astro Intelligence Platform</span>
              </h1>
              <p className="text-gray-400 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
                Unlock your destiny with authentic Vedic calculations based on your exact Birth Nakshatras and Planetary Drishti.
