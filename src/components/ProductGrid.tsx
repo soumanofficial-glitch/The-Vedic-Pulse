@@ -170,10 +170,6 @@ export const ProductGrid = ({ onSelect }: { onSelect: (id: string, price: number
                       <span className="text-5xl font-black text-amber-400 italic tracking-tighter">₹{featuredReports[0].price}</span>
                       <div className="flex flex-col">
                         <span className="text-amber-500/80 text-[10px] font-black uppercase tracking-widest">Divine Only!</span>
-                        <div className="bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1 mt-1">
-                          <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                          <span className="text-[8px] text-emerald-500 font-black uppercase tracking-widest">No Hidden Cost</span>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -229,10 +225,7 @@ export const ProductGrid = ({ onSelect }: { onSelect: (id: string, price: number
               <div className="text-right">
                 <div className="text-[10px] text-gray-500 line-through italic">₹{product.originalPrice}</div>
                 <div className="text-xl font-black text-amber-400 leading-none mt-1">₹{product.price} <span className="text-[10px] text-amber-500/50 uppercase tracking-tighter">Only!</span></div>
-                <div className="flex items-center gap-1 mt-2 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/10 self-end">
-                   <div className="w-0.5 h-0.5 rounded-full bg-emerald-500 animate-pulse" />
-                   <span className="text-[7px] text-emerald-500 font-black uppercase tracking-widest">No Hidden Cost</span>
-                </div>
+                <div className="flex items-center gap-1 mt-2 self-end" />
               </div>
             </div>
 
@@ -257,11 +250,6 @@ export const ProductGrid = ({ onSelect }: { onSelect: (id: string, price: number
           <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-widest">
             <ShieldCheck size={14} className="text-emerald-500" />
             One-Time Payment
-          </div>
-          <div className="w-1 h-1 rounded-full bg-white/10 hidden sm:block" />
-          <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-widest">
-            <ShieldCheck size={14} className="text-emerald-500" />
-            No Hidden Charges
           </div>
           <div className="w-1 h-1 rounded-full bg-white/10 hidden sm:block" />
           <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-widest">

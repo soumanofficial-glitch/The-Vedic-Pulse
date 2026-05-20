@@ -26,10 +26,6 @@ const faqs = [
   {
     question: "How do I access my report after payment?",
     answer: "Immediately after your Razorpay payment is successful, our system generates your report in seconds. You will be redirected to your personal dashboard where you can view, interact with, and download your report instantly."
-  },
-  {
-    question: "Are there any hidden charges or recurring monthly fees?",
-    answer: "Absolutely not. Every payment on The Vedic Pulse is a strict one-time charge. There are no hidden fees, no automatic renewals, and no surprise subscriptions. You only pay for the specific report you choose to generate."
   }
 ];
 

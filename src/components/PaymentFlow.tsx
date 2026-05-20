@@ -175,16 +175,12 @@ export const PaymentFlow = ({
                    Limited Time Offer
                  </span>
               </div>
-              <h2 className="text-4xl font-black mb-1 text-white flex items-center justify-center gap-2">
+              <h2 className="text-5xl font-black mb-1 text-white flex items-center justify-center gap-2">
                 ₹{price}
-                <span className="text-gray-600 text-sm line-through font-medium">₹125</span>
+                <span className="text-gray-600 text-sm line-through font-medium">₹{price === 9 ? 85 : 125}</span>
               </h2>
               <div className="flex flex-col items-center">
-                 <p className="text-amber-500/80 text-[10px] uppercase tracking-[0.3em] font-black italic">Sacred {price} Only!</p>
-                 <div className="bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5 mt-2">
-                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest leading-none">No Hidden Cost</span>
-                 </div>
+                 <p className="text-amber-500 font-bold text-[10px] uppercase tracking-[0.2em]">One-Time Payment • No Hidden Cost</p>
               </div>
             </div>
 
@@ -199,7 +195,7 @@ export const PaymentFlow = ({
                       One-Time
                    </div>
                    <div className="w-px h-3 bg-white/10" />
-                   <span>No hidden fees</span>
+                   <span>No hidden cost</span>
                 </div>
               </div>
 
@@ -220,7 +216,7 @@ export const PaymentFlow = ({
               </button>
 
               <p className="text-center text-[8px] text-gray-500 italic mt-2">
-                This is a <span className="text-emerald-500 font-bold">one-time payment</span>. No recurring charges or hidden fees.
+                This is a <span className="text-emerald-500 font-bold">one-time payment</span>. No hidden cost.
               </p>
 
               <div className="flex items-center justify-between pt-6 mt-4 border-t border-white/5">
