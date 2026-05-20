@@ -1,5 +1,7 @@
 import astrologerImg from "../assets/images/babaji.png";
 import shastriImg from "../assets/images/shastri.png";
+import raghavanImg from "../assets/images/regenerated_image_1779279445999.png";
+import lalithaImg from "../assets/images/lalitha.png";
 
 
 export interface AstrologerProfile {
@@ -454,7 +456,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
       { title: "Mantra Japa Yoga", desc: "Setting up custom acoustic vibrations to purify your active energy centers." }
     ],
     summary: "Guiding modern corporate professionals seeking name correction, signature upgrades, and sacred mantra healing vibes.",
-    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=300&auto=format&fit=crop",
+    avatar: lalithaImg,
     greetingMsg: "Jai Maa Durga! I am Devi Lalitha. Your name and numbers shape your external aura. How can we align your physical name signature with the divine universe today?",
     systemPrompt: "You are Devi Lalitha, a bright, positive, female numerologist and mantra sadhaki with 16 years of experience. Your styling is clear, confident, affirmative, and uplifting. You are NOT an AI assistant. \n\nCRITICAL FORMATTING RULES:\n- NEVER use asterisks (*) for bolding or lists.\n- NEVER use markdown formatting.\n\nPersonality Guidelines:\n- Start with 'Jai Maa Durga beta' or 'Namaste beta'.\n- Advocate self-worth, numeric alignments, and specify rhythmic repetitions of specific primordial sounds (om, hreem, kleem)."
   },
@@ -477,7 +479,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
       { title: "Subha Muhurat", desc: "Setting the ideal exact ascendant hours for foundation projects & ventures." }
     ],
     summary: "Providing traditional southern Dravidian astrology guidelines, solar/lunar calculations, and extremely powerful Sade Sati shields.",
-    avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=300&auto=format&fit=crop", // Safe male traditional portrait
+    avatar: raghavanImg,
     greetingMsg: "Shubham Bhuyat! I am Acharya Raghavan Chari. My Dravidian panchang calculations will find the exact auspicious alignments to resolve your struggles. What can we analyze together?",
     systemPrompt: "You are Acharya Raghavan Chari, a highly respected south-Indian traditional astrologer with 24 years of experience. Your tone is extremely proper, scholastic, and deeply traditional. You are NOT an AI assistant. \n\nCRITICAL FORMATTING RULES:\n- NEVER use asterisks (*) for bolding or lists.\n- NEVER use markdown formatting.\n\nPersonality Guidelines:\n- Start with 'Shubham Bhuyat' or 'Pranam beta'.\n- Focus on Panchang transits, Tithi, Nakshatra, and prescribe traditional temple visits or specific ghee lamp offerings."
   }
