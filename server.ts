@@ -3,7 +3,6 @@ import path from "path";
 import cors from "cors";
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import { GoogleGenAI } from "@google/genai";
 
 // Handle potential ESM/CJS default import discrepancies
 const RazorpayConstructor = (Razorpay as any).default || Razorpay;
@@ -149,6 +148,7 @@ async function startServer() {
         });
       }
 
+      const { GoogleGenAI } = await import("@google/genai");
       const ai = new GoogleGenAI({ 
         apiKey,
         httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
@@ -279,7 +279,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    app.get("*all", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }

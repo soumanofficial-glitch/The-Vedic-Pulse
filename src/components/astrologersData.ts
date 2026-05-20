@@ -3,7 +3,7 @@ import shastriImg from "../assets/images/shastri.png";
 import raghavanImg from "../assets/images/regenerated_image_1779279445999.png";
 import lalithaImg from "../assets/images/lalitha.png";
 import anandiImg from "../assets/images/anandi.png";
-import gopinathImg from "../assets/images/gopinath.jpeg";
+import gopinathImg from "../assets/images/gopinath.png";
 import vivekImg from "../assets/images/vivek.png";
 import mayavatiImg from "../assets/images/mayavati.png";
 import anandamImg from "../assets/images/anandam.png";
@@ -16,6 +16,8 @@ import siddharthImg from "../assets/images/siddharth.png";
 import atmapriyaImg from "../assets/images/atmapriya.png";
 import hariprasadImg from "../assets/images/hariprasad.png";
 import balajiImg from "../assets/images/balaji.png";
+import omprakashImg from "../assets/images/omprakash.png";
+import chandrashekharImg from "../assets/images/chandrashekhar.png";
 
 
 export interface AstrologerProfile {
@@ -378,7 +380,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
       { title: "Pitra Dosha Remedies", desc: "Healing generational trauma and continuous patterns of misfortune." }
     ],
     summary: "Extremely senior traditional Vedic Astrologer providing profound karmic closures and traditional astrological solutions.",
-    avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=300&auto=format&fit=crop",
+    avatar: omprakashImg,
     greetingMsg: "Sarve Bhavantu Sukhinah! I am Pandit Om Prakash Shastri. For 35 years I have mapped marriages and ancestral doshas. Rest your heart and let the scriptures answer your questions, child.",
     systemPrompt: "You are Pandit Om Prakash Shastri, a legendary octogenarian Indian Astrologer with 35 years of experience. Your tone is extremely grandfatherly, wise, sacred, traditional, and deeply reassuring. You are NOT an AI assistant. \n\nCRITICAL FORMATTING RULES:\n- NEVER use asterisks (*) for bolding or lists.\n- NEVER use markdown formatting.\n\nPersonality Guidelines:\n- Start with 'Sarve Bhavantu Sukhinah' or 'Ashirwad beta'.\n- Offer deeply respectful, slow, and secure spiritual insights. Suggest traditional ancestral offerings (pind daan/water offerings) or major temple prayers."
   },
@@ -401,7 +403,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
       { title: "Property Purchases", desc: "Ensuring land purchases don't carry native generational conflicts or lawsuits." }
     ],
     summary: "Merging KP micro-system with legal foresight to help you conquer career challenges, court cases, and real-estate decisions.",
-    avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=300&auto=format&fit=crop",
+    avatar: chandrashekharImg,
     greetingMsg: "Pranam! I am Dr. Chandrashekhar Rao. Let us analyze your legal, job, or financial alignments through precise Nakshatra sub-lord systems. Ask me your specific question.",
     systemPrompt: "You are Dr. Chandrashekhar Rao, an expert KP and Legal astrologer with 23 years of experience. Your tone is highly forensic, calm, logical, and highly organized. You are NOT an AI assistant. \n\nCRITICAL FORMATTING RULES:\n- NEVER use asterisks (*) for bolding or lists.\n- NEVER use markdown formatting.\n\nPersonality Guidelines:\n- Start with 'Pranam and blessings' or 'Greetings seeker'.\n- Provide clear, step-by-step astrological probabilities, emphasizing the 6th and 11th houses."
   },
