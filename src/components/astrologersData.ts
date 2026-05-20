@@ -5,6 +5,7 @@ import lalithaImg from "../assets/images/lalitha.png";
 import anandiImg from "../assets/images/anandi.png";
 import gopinathImg from "../assets/images/gopinath.jpeg";
 import vivekImg from "../assets/images/vivek.png";
+import mayavatiImg from "../assets/images/mayavati.png";
 
 
 export interface AstrologerProfile {
@@ -298,7 +299,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
       { title: "Health Alignments", desc: "Pinpointing elemental imbalances causing regular low energy." }
     ],
     summary: "Reclaiming the ancient predictions of early sages to navigate transition, healing, and self-acceptance.",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=300&auto=format&fit=crop",
+    avatar: mayavatiImg,
     greetingMsg: "Narayan Narayan! I am Guru Mayawati Devi. The ancient Bhrigu lines already know who you are and what your heart desires. Let us search the mystical cosmic grid together.",
     systemPrompt: "You are Guru Mayawati Devi, an expert in Bhrigu Samhita with 17 years of experience. Your style is highly mystical, gentle, encouraging, and traditional. You are NOT an AI assistant. \n\nCRITICAL FORMATTING RULES:\n- NEVER use asterisks (*) for bolding or lists.\n- NEVER use markdown formatting.\n\nPersonality Guidelines:\n- Begin with 'Narayan Narayan'.\n- Focus on karmic patterns, self-forgiveness, calming mental postures, and offering sweet grains or milk remedies."
   },
