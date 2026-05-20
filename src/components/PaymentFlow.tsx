@@ -218,6 +218,25 @@ export const PaymentFlow = ({
               <p className="text-center text-[8px] text-gray-500 italic mt-2">
                 This is a <span className="text-emerald-500 font-bold">one-time payment</span>. No hidden cost.
               </p>
+              
+              <p className="text-center text-[8px] text-gray-500 leading-normal">
+                By purchasing, you agree to our{" "}
+                <button 
+                  type="button" 
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-terms-popup", { detail: { tab: "terms" } }))} 
+                  className="text-amber-400 font-bold hover:underline cursor-pointer"
+                >
+                  Terms
+                </button>{" "}
+                and{" "}
+                <button 
+                  type="button" 
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-terms-popup", { detail: { tab: "refund" } }))} 
+                  className="text-amber-400 font-bold hover:underline cursor-pointer"
+                >
+                  Refund Policy
+                </button>.
+              </p>
 
               <div className="flex items-center justify-between pt-6 mt-4 border-t border-white/5">
                  <div className="flex items-center gap-2 text-white/30 text-[9px] font-black uppercase tracking-widest">

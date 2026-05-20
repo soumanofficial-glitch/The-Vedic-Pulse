@@ -22,6 +22,7 @@ import { BirthDetails, AstrologyReport } from "./types";
 import { trackMetaEvent } from "./lib/metaTracking";
 import { useEffect } from "react";
 import { ChatWithAstrologer } from "./components/ChatWithAstrologer";
+import { TermsPopup } from "./components/TermsPopup";
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<{ id: string; price: number } | null>(null);
@@ -180,6 +181,7 @@ export default function App() {
         )}
       </AnimatePresence>
       <ChatWithAstrologer />
+      <TermsPopup />
     </div>
   );
 }

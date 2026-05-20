@@ -60,10 +60,42 @@ export const Footer = () => {
             <div>
               <h4 className="font-bold text-xs uppercase tracking-[0.2em] mb-6 text-amber-200/50">Support</h4>
               <ul className="space-y-4 text-xs font-semibold uppercase tracking-widest text-gray-500">
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Refund Policy</a></li>
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-amber-400 transition-colors">Privacy Policy</a></li>
+                <li>
+                  <button 
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent("open-terms-popup", { detail: { tab: "terms" } }))} 
+                    className="hover:text-amber-400 transition-colors text-left w-full cursor-pointer"
+                  >
+                    Help Center
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent("open-terms-popup", { detail: { tab: "refund" } }))} 
+                    className="hover:text-amber-400 transition-colors text-left w-full cursor-pointer"
+                  >
+                    Refund Policy
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent("open-terms-popup", { detail: { tab: "terms" } }))} 
+                    className="hover:text-amber-400 transition-colors text-left w-full cursor-pointer"
+                  >
+                    Terms of Service
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent("open-terms-popup", { detail: { tab: "privacy" } }))} 
+                    className="hover:text-amber-400 transition-colors text-left w-full cursor-pointer"
+                  >
+                    Privacy Policy
+                  </button>
+                </li>
               </ul>
             </div>
 

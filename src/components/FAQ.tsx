@@ -98,7 +98,7 @@ export const FAQ = () => {
         
         <div className="mt-12 text-center">
             <p className="text-gray-500 text-xs uppercase tracking-widest">
-                Still have questions? Reach out to support at <span className="text-amber-500/80">help@jyotishglow.com</span>
+                Still have questions? Reach out to support at <span className="text-amber-500/80">info.vedicpulse@gmail.com</span>
             </p>
         </div>
       </div>
