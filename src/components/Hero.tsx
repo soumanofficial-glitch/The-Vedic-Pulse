@@ -30,35 +30,38 @@ export const Hero = ({ onSelect }: { onSelect?: (id: string, price: number) => v
 
           <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
             <button 
-              onClick={() => onSelect ? onSelect("love-compatibility", 9) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+              id="cta-chat-astrologer"
+              onClick={() => window.dispatchEvent(new CustomEvent("open-astrologer-chat"))}
               className="px-6 py-5 bg-amber-500 text-black font-black rounded-2xl hover:bg-white active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(245,158,11,0.4)] group"
             >
               <div className="flex items-center gap-1.5 mb-0.5">
-                <Heart className="w-3.5 h-3.5 fill-current animate-pulse text-black" />
+                <MessageCircle className="w-3.5 h-3.5 fill-current text-black" />
+                <span>Chat with Astrologer</span>
+              </div>
+              <div className="flex items-center gap-2">
+                 <span className="text-xs text-amber-950 uppercase font-black tracking-widest">30 SEC FREE TRIAL</span>
+                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                 <span className="text-[10px] text-amber-900 font-bold uppercase">Free Chat</span>
+              </div>
+            </button>
+            <button 
+              id="cta-love-compatibility"
+              onClick={() => onSelect ? onSelect("love-compatibility", 9) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-6 py-5 bg-white text-black font-black rounded-2xl hover:bg-amber-400 active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(255,255,255,0.2)] group"
+            >
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Heart className="w-3.5 h-3.5 fill-current animate-pulse text-rose-600" />
                 <span>Love Compatibility</span>
               </div>
             </button>
             <button 
+              id="cta-kundli-report"
               onClick={() => onSelect ? onSelect("complete-future", 9) : document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-6 py-5 bg-white text-black font-black rounded-2xl hover:bg-amber-400 active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(255,255,255,0.2)] group"
-            >
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <Zap className="w-3.5 h-3.5 fill-current animate-pulse text-amber-600" />
-                <span>2026-2030 Kundli Report</span>
-              </div>
-            </button>
-            <button 
-              onClick={() => window.dispatchEvent(new CustomEvent("open-astrologer-chat"))}
               className="px-6 py-5 bg-purple-600 text-white font-black rounded-2xl hover:bg-purple-500 active:scale-95 transition-all text-[11px] sm:text-xs uppercase tracking-[0.15em] flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_30px_rgba(147,51,234,0.4)] group"
             >
               <div className="flex items-center gap-1.5 mb-0.5">
-                <MessageCircle className="w-3.5 h-3.5 fill-current" />
-                <span>Chat with Astrologer</span>
-              </div>
-              <div className="flex items-center gap-2">
-                 <span className="text-xs text-purple-100 uppercase font-black tracking-widest">30 SEC FREE TRIAL</span>
-                 <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
-                 <span className="text-[10px] text-purple-200 font-bold uppercase">Free Chat</span>
+                <Zap className="w-3.5 h-3.5 fill-current animate-pulse text-amber-300" />
+                <span>2026-2030 Kundli Report</span>
               </div>
             </button>
           </div>
