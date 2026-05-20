@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { MessageCircle, X, Send, User, Sparkles, Clock, Lock, CreditCard, ChevronDown, Award, ShieldCheck, Users, Star, BookOpen, CheckCircle, Heart, Zap, Volume2, VolumeX } from "lucide-react";
-// Using a high-quality, realistic portrait of a wise elderly Indian man for the astrologer
-const astrologerImg = "https://images.unsplash.com/photo-1601054704854-1a2e79dac4d3?q=80&w=800&auto=format&fit=crop";
+import astrologerImg from "../assets/images/babaji.png";
+
 
 interface Message {
   id: string;
