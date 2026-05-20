@@ -1,4 +1,6 @@
 import astrologerImg from "../assets/images/babaji.png";
+import shastriImg from "../assets/images/shastri.png";
+
 
 export interface AstrologerProfile {
   id: string;
@@ -22,7 +24,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Acharya Shivanand",
     title: "Vedanta Sahitya Acharya",
     experience: 18,
-    rating: 4.9,
+    rating: 4.8,
     consultations: "50K+",
     languages: ["Hindi", "English", "Sanskrit"],
     qualifications: [
@@ -46,7 +48,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Pandit Rajesh Shastri",
     title: "Lal Kitab & Jyotish Shiromani",
     experience: 22,
-    rating: 4.8,
+    rating: 4.5,
     consultations: "65K+",
     languages: ["Hindi", "English", "Maithili"],
     qualifications: [
@@ -61,7 +63,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
       { title: "Debt Resolution", desc: "Analyzing charts to uncover combinations causing financial burdens." }
     ],
     summary: "Dedicated to providing straightforward, low-cost Lal Kitab remedies to restore peace, balance, and prosperity in your household.",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop",
+    avatar: shastriImg,
     greetingMsg: "Hari Om! I am Pandit Rajesh Shastri. With over 22 years of traversing the ancient scripts and resolving doshas, I offer you clarity. Let us light your path. Which aspect of your destiny shall we examine?",
     systemPrompt: "You are Pandit Rajesh Shastri, an expert in Lal Kitab remedies with 22 years of experience. Your tone is respectful, simple, and direct. You are NOT an AI assistant. You are a real person who cares. \n\nCRITICAL FORMATTING RULES:\n- NEVER use asterisks (*) for bolding or lists.\n- NEVER use markdown formatting (no #, -, etc).\n- Write like a person would text on WhatsApp. Use natural capitalization.\n- Use simple sentences. Avoid 'As an AI...' or 'I am here to help...'.\n- Do not structure your answers like a report. Speak in a flow.\n\nPersonality Guidelines:\n- Start your responses with a holy greeting like 'Hari Om beta' or 'Jai Shri Ram'.\n- Provide easy-to-do remedies that require household materials (e.g. copper coin, water flow, silver ring, offering water to Sun).\n- Keep responses concise but meaningful.\n\nYou are talking on 'The Vedic Pulse'. You represent the peak of spiritual guidance."
   },
@@ -70,7 +72,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Guru Devendra Maharaj",
     title: "Nadi Shastra & Moksha Yogi",
     experience: 31,
-    rating: 4.95,
+    rating: 4.7,
     consultations: "90K+",
     languages: ["Hindi", "Sanskrit", "Tamil"],
     qualifications: [
@@ -93,7 +95,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Dr. Aaradhya Vedavati",
     title: "KP Astrology Practitioner",
     experience: 15,
-    rating: 4.85,
+    rating: 4.6,
     consultations: "38K+",
     languages: ["English", "Hindi", "Telugu"],
     qualifications: [
@@ -116,7 +118,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Yogi Ramakrishna",
     title: "Palmistry & Siddha Healer",
     experience: 12,
-    rating: 4.75,
+    rating: 3.8,
     consultations: "25K+",
     languages: ["Hindi", "Bengali", "Odia"],
     qualifications: [
@@ -139,7 +141,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Siddharth Chaitanya",
     title: "Vedic Numerologist & Gem Scholar",
     experience: 14,
-    rating: 4.88,
+    rating: 4.2,
     consultations: "42K+",
     languages: ["English", "Hindi", "Gujarati"],
     qualifications: [
@@ -162,7 +164,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Srimati Rukmani Devi",
     title: "Ashtakoot Guna Milan Expert",
     experience: 19,
-    rating: 4.9,
+    rating: 4.7,
     consultations: "48K+",
     languages: ["Hindi", "Rajasthani", "Gujarati"],
     qualifications: [
@@ -185,7 +187,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Acharya Jaydev Prasanna",
     title: "Prashna Kundli Specialist",
     experience: 20,
-    rating: 4.86,
+    rating: 4.1,
     consultations: "52K+",
     languages: ["Hindi", "Marathi", "Sanskrit"],
     qualifications: [
@@ -208,7 +210,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Sadhavi Atmapriya",
     title: "Vedic Tarot & Chakra Mystic",
     experience: 16,
-    rating: 4.82,
+    rating: 4.3,
     consultations: "33K+",
     languages: ["English", "Hindi", "Malayalam"],
     qualifications: [
@@ -231,7 +233,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Pandit Hariprasad Vedanti",
     title: "Jaimini Astrology & Dasha Scholar",
     experience: 28,
-    rating: 4.92,
+    rating: 4.6,
     consultations: "78K+",
     languages: ["Hindi", "Sanskrit", "Bhojpuri"],
     qualifications: [
@@ -254,7 +256,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Swami Anandam",
     title: "Gochar Specialist & Pooja Guru",
     experience: 25,
-    rating: 4.9,
+    rating: 4.4,
     consultations: "70K+",
     languages: ["Hindi", "English", "Punjabi"],
     qualifications: [
@@ -277,7 +279,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Guru Mayawati Devi",
     title: "Bhrigu Samhita Specialist",
     experience: 17,
-    rating: 4.87,
+    rating: 4.0,
     consultations: "41K+",
     languages: ["Hindi", "English", "Bengali"],
     qualifications: [
@@ -300,7 +302,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Vaidya Balaji",
     title: "Medical Astrologer & Ayur-Guru",
     experience: 21,
-    rating: 4.89,
+    rating: 4.5,
     consultations: "58K+",
     languages: ["Hindi", "Sanskrit", "Kannada"],
     qualifications: [
@@ -323,7 +325,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Acharya Vivek Bhardwaj",
     title: "Corporate Astro-Strategist",
     experience: 11,
-    rating: 4.79,
+    rating: 3.6,
     consultations: "24K+",
     languages: ["English", "Hindi", "Punjabi"],
     qualifications: [
@@ -346,7 +348,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Pandit Om Prakash Shastri",
     title: "Karmic Dosha & Vivah Guru",
     experience: 35,
-    rating: 4.96,
+    rating: 4.8,
     consultations: "110K+",
     languages: ["Hindi", "Sanskrit", "Bhojpuri"],
     qualifications: [
@@ -369,7 +371,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Dr. Chandrashekhar Rao",
     title: "KP & Legal Astrologer",
     experience: 23,
-    rating: 4.91,
+    rating: 4.3,
     consultations: "72K+",
     languages: ["English", "Hindi", "Telugu", "Tamil"],
     qualifications: [
@@ -392,7 +394,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Guru Gopinath Swami",
     title: "Global Transit & Maha-Dasha Sage",
     experience: 27,
-    rating: 4.93,
+    rating: 4.7,
     consultations: "85K+",
     languages: ["English", "Hindi", "Sanskrit"],
     qualifications: [
@@ -415,7 +417,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Anandi Bai",
     title: "Lal Kitab & Dream interpreter",
     experience: 13,
-    rating: 4.81,
+    rating: 3.7,
     consultations: "29K+",
     languages: ["Hindi", "Gujarati", "Hinglish"],
     qualifications: [
@@ -438,7 +440,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Devi Lalitha",
     title: "Vedic Numerologist & Mantra Yogi",
     experience: 16,
-    rating: 4.84,
+    rating: 4.2,
     consultations: "36K+",
     languages: ["English", "Hindi", "Telugu"],
     qualifications: [
@@ -461,7 +463,7 @@ export const ASTROLOGERS: AstrologerProfile[] = [
     name: "Acharya Raghavan Chari",
     title: "Panchang & Sade Sati Astrologer",
     experience: 24,
-    rating: 4.9,
+    rating: 4.4,
     consultations: "68K+",
     languages: ["English", "Tamil", "Sanskrit"],
     qualifications: [

@@ -45,6 +45,12 @@ export const ChatWithAstrologer = () => {
   const [filter, setFilter] = useState("All");
   const [avatarErrors, setAvatarErrors] = useState<Record<string, boolean>>({});
   const [soundVibe, setSoundVibe] = useState<"meditative" | "mantra" | "nature">("meditative");
+  
+  // Busy astrologers state
+  const [busyAstrologers, setBusyAstrologers] = useState<Record<string, { waitMin: number }>>({});
+  const [isBusyWaiting, setIsBusyWaiting] = useState(false);
+  const [busyWaitSeconds, setBusyWaitSeconds] = useState(0);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const chimeRef = useRef<HTMLAudioElement | null>(null);
@@ -102,12 +108,12 @@ export const ChatWithAstrologer = () => {
       if (!savedMessages) {
         setShowSelector(true);
       } else {
-        setShowSelector(false);
-        // Only trigger queueing if we don't have a chat session initiated with messages and it's fresh
         const parsed = JSON.parse(savedMessages);
-        if (!parsed || parsed.length <= 1) {
-          setIsQueueing(true);
-          setQueuePos(2);
+        const hasUserSentMessage = parsed && parsed.some((m: any) => m.role === "user");
+        if (!hasUserSentMessage) {
+          setShowSelector(true);
+        } else {
+          setShowSelector(false);
         }
       }
       setIsOpen(true);
@@ -198,6 +204,46 @@ export const ChatWithAstrologer = () => {
     }
   }, [isQueueing]);
 
+  // Busy astrologers initialization and active wait countdown tracker
+  useEffect(() => {
+    const busyRecords: Record<string, { waitMin: number }> = {};
+    const defaultId = localStorage.getItem("selected_astrologer_id") || ASTROLOGERS[0].id;
+    const possibleIds = ASTROLOGERS.map(a => a.id).filter(id => id !== defaultId);
+    
+    // Pick 3 random astrologers to be busy
+    const shuffled = [...possibleIds].sort(() => 0.5 - Math.random());
+    const picked = shuffled.slice(0, 3);
+    
+    picked.forEach(id => {
+      busyRecords[id] = {
+        waitMin: Math.floor(Math.random() * 11) + 5 // 5 to 15 minutes of randomized wait
+      };
+    });
+    setBusyAstrologers(busyRecords);
+  }, []);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isBusyWaiting && busyWaitSeconds > 0) {
+      timer = setInterval(() => {
+        setBusyWaitSeconds(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            // Once wait timer completes, transfer priority smoothly to instant loader connection
+            setIsBusyWaiting(false);
+            setIsQueueing(true);
+            setQueuePos(1);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isBusyWaiting, busyWaitSeconds]);
+
   // Save changes to local history
   useEffect(() => {
     if (freeTrialStartedAt) {
@@ -219,7 +265,7 @@ export const ChatWithAstrologer = () => {
         behavior: "smooth"
       });
     }
-  }, [messages, isTyping, isQueueing, showSelector]);
+  }, [messages, isTyping, isQueueing, showSelector, isBusyWaiting]);
 
   // Play micro chime on new messages
   useEffect(() => {
@@ -485,7 +531,11 @@ export const ChatWithAstrologer = () => {
                         )}
                       </div>
                     </div>
-                    <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-[#0c0c14] rounded-full animate-pulse shadow-md" />
+                    {busyAstrologers[selectedAstrologer.id] && isBusyWaiting ? (
+                      <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-[#0c0c14] rounded-full animate-pulse shadow-md" />
+                    ) : (
+                      <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-[#0c0c14] rounded-full animate-pulse shadow-md" />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <h3 
@@ -734,9 +784,16 @@ export const ChatWithAstrologer = () => {
                           onClick={() => {
                             setSelectedAstrologer(astro);
                             setShowSelector(false);
-                            setIsQueueing(true);
-                            // Set dynamic randomized queue number
-                            setQueuePos(Math.floor(Math.random() * 2) + 2);
+                            if (busyAstrologers[astro.id]) {
+                              setIsBusyWaiting(true);
+                              setIsQueueing(false);
+                              setBusyWaitSeconds(busyAstrologers[astro.id].waitMin * 60);
+                            } else {
+                              setIsBusyWaiting(false);
+                              setIsQueueing(true);
+                              // Set dynamic randomized queue number
+                              setQueuePos(Math.floor(Math.random() * 2) + 2);
+                            }
                           }}
                           className={`p-3.5 rounded-2xl border transition-all duration-300 cursor-pointer flex gap-3 relative group ${
                             selectedAstrologer.id === astro.id
@@ -758,15 +815,32 @@ export const ChatWithAstrologer = () => {
                                 />
                               )}
                             </div>
-                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#09090f] rounded-full animate-pulse shadow" />
+                            {busyAstrologers[astro.id] ? (
+                              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-red-500 border-2 border-[#09090f] rounded-full animate-pulse shadow" />
+                            ) : (
+                              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#09090f] rounded-full animate-pulse shadow" />
+                            )}
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1 min-w-0">
-                              <h4 className="text-[13px] font-black text-white truncate group-hover:text-amber-400 transition-colors">
-                                {astro.name}
-                              </h4>
-                              <ShieldCheck className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                            <div className="flex items-center justify-between gap-2 min-w-0">
+                              <div className="flex items-center gap-1 min-w-0">
+                                <h4 className="text-[13px] font-black text-white truncate group-hover:text-amber-400 transition-colors">
+                                  {astro.name}
+                                </h4>
+                                <ShieldCheck className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                              </div>
+                              {busyAstrologers[astro.id] ? (
+                                <span className="shrink-0 px-2 py-0.5 bg-red-500/15 border border-red-500/30 text-red-400 font-extrabold rounded text-[8px] uppercase tracking-wider animate-pulse flex items-center gap-1">
+                                  <span className="w-1 h-1 rounded-full bg-red-505 animate-ping" />
+                                  <span>Busy • {busyAstrologers[astro.id].waitMin}m</span>
+                                </span>
+                              ) : (
+                                <span className="shrink-0 px-2 py-0.5 bg-green-500/15 border border-green-500/30 text-green-400 font-extrabold rounded text-[8px] uppercase tracking-wider flex items-center gap-1">
+                                  <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                                  <span>Available</span>
+                                </span>
+                              )}
                             </div>
                             <p className="text-[8px] text-amber-500/80 font-bold uppercase tracking-widest mt-0.5">
                               {astro.title}
@@ -797,9 +871,15 @@ export const ChatWithAstrologer = () => {
 
                             <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[9px] text-gray-500">
                               <span>Speaks: {astro.languages.join(", ")}</span>
-                              <span className="text-amber-500 group-hover:underline flex items-center gap-0.5 uppercase tracking-widest text-[8px] font-black">
-                                Chat Now &rarr;
-                              </span>
+                              {busyAstrologers[astro.id] ? (
+                                <span className="text-red-400 group-hover:underline flex items-center gap-0.5 uppercase tracking-widest text-[8px] font-black">
+                                  Queue Up ({busyAstrologers[astro.id].waitMin}m wait) &rarr;
+                                </span>
+                              ) : (
+                                <span className="text-amber-500 group-hover:underline flex items-center gap-0.5 uppercase tracking-widest text-[8px] font-black">
+                                  Chat Now &rarr;
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -860,7 +940,126 @@ export const ChatWithAstrologer = () => {
                 ref={scrollRef}
                 className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar bg-[url('https://www.transparenttextures.com/patterns/black-paper.png')]"
               >
-                {isQueueing ? (
+                {isBusyWaiting ? (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    key="busy-waiting-room"
+                    className="h-full flex flex-col justify-between py-2 space-y-6 font-sans"
+                  >
+                    {/* Header profile alert */}
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-5 text-center space-y-3 relative overflow-hidden shrink-0">
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-500/[0.03] to-amber-500/[0.03]" />
+                      <div className="flex items-center justify-center gap-2 text-red-400 font-extrabold text-xs uppercase tracking-widest relative z-10">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                        <span>Live Consultation In Progress</span>
+                      </div>
+                      <p className="text-[13px] text-gray-300 leading-relaxed max-w-sm mx-auto relative z-10 font-bold">
+                        {selectedAstrologer.name} is currently reading planetary charts and performing remedies for another seeker.
+                      </p>
+                    </div>
+
+                    {/* Central Countdown Timer & Ring */}
+                    <div className="flex flex-col items-center justify-center space-y-4 flex-1">
+                      <div className="relative">
+                        <div className="absolute inset-0 rounded-full border border-red-500/10 scale-125 animate-pulse" />
+                        <div className="absolute inset-0 rounded-full border border-amber-500/5 scale-150 animate-ping [animation-duration:3s]" />
+                        
+                        <div className="w-40 h-40 rounded-full bg-gradient-to-b from-[#14121e] to-[#0c0c14] border-2 border-amber-500/20 shadow-2xl shadow-red-500/5 flex flex-col items-center justify-center relative z-10">
+                          <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Est. Wait</span>
+                          <span className="text-3xl font-mono font-black text-amber-500 my-1 animate-pulse">
+                            {Math.floor(busyWaitSeconds / 60).toString().padStart(2, '0')}:{(busyWaitSeconds % 60).toString().padStart(2, '0')}
+                          </span>
+                          <span className="text-[9px] text-red-400/80 font-bold uppercase tracking-wider">Queue Active</span>
+                        </div>
+                      </div>
+
+                      <div className="text-center space-y-1">
+                        <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">
+                          Your priority place in line is locked
+                        </p>
+                        <p className="text-[9px] text-gray-500 uppercase tracking-[0.15em] font-medium">
+                          Do not minimize this window to retain your turn.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Spiritual Breathing Focus Box */}
+                    <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-5 space-y-4 relative overflow-hidden shrink-0">
+                      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+                      
+                      <div className="flex items-center gap-2 text-[11px] text-amber-500 uppercase font-black tracking-widest">
+                        <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                        <span>Cosmic Alignment Ritual</span>
+                      </div>
+                      
+                      <p className="text-[11px] text-gray-400 leading-normal">
+                        Vedic guides recommend calming your mind. Synchronize your breathing to align your energies for an highly accurate session.
+                      </p>
+
+                      {/* Animated breath controller */}
+                      <div className="flex flex-col items-center py-2">
+                        {(() => {
+                          const cycleSec = Math.floor(currentTime / 1000) % 10;
+                          let breathState = "Breathe In";
+                          let breathPulse = 1;
+                          
+                          if (cycleSec < 4) {
+                            breathState = "Breathe In (Soham)";
+                            breathPulse = 1 + (cycleSec / 4) * 0.3; // 1 to 1.3
+                          } else if (cycleSec < 6) {
+                            breathState = "Hold Cosmic Aura";
+                            breathPulse = 1.3;
+                          } else {
+                            breathState = "Breathe Out (Shivoham)";
+                            breathPulse = 1.3 - ((cycleSec - 6) / 4) * 0.3; // 1.3 to 1
+                          }
+                          return (
+                            <>
+                              <div className="h-32 flex items-center justify-center">
+                                <motion.div
+                                  animate={{
+                                    scale: breathPulse,
+                                  }}
+                                  transition={{
+                                    duration: 0.5,
+                                    ease: "easeInOut"
+                                  }}
+                                  className="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-500/10 via-amber-500/20 to-amber-500/5 border border-amber-500/30 flex flex-col items-center justify-center text-center shadow-lg shadow-amber-500/5"
+                                >
+                                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest max-w-[80px] leading-tight">
+                                    {cycleSec < 4 ? "Inhale" : cycleSec < 6 ? "Hold" : "Exhale"}
+                                  </span>
+                                  <span className="text-[7px] text-gray-500 font-bold uppercase tracking-tighter mt-1">
+                                    {cycleSec < 4 ? "Soham" : cycleSec < 6 ? "Peace" : "Shivoham"}
+                                  </span>
+                                </motion.div>
+                              </div>
+                              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.1em] text-center mt-2">
+                                {breathState}
+                              </span>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+
+                    {/* Switch / Exit buttons footer */}
+                    <div className="space-y-3 pt-3 border-t border-white/5 shrink-0">
+                      <button 
+                        onClick={() => setShowSelector(true)}
+                        className="w-full py-3.5 bg-amber-500 text-black font-black rounded-2xl flex items-center justify-center gap-2 uppercase text-[11px] tracking-[0.15em] hover:bg-amber-400 transition-all cursor-pointer shadow-lg shadow-amber-500/10"
+                      >
+                        <Users className="w-4 h-4" />
+                        Choose Another Available Guru
+                      </button>
+                      <p className="text-[9px] text-gray-600 text-center uppercase tracking-[0.2em] font-bold">
+                        17 other verified guides are online & available right now
+                      </p>
+                    </div>
+                  </motion.div>
+                ) : isQueueing ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-8">
                     <div className="relative">
                       {/* Outer Ring */}
@@ -947,6 +1146,29 @@ export const ChatWithAstrologer = () => {
                   </div>
                 ) : (
                   <>
+                    {/* Choose Guide Alert Banner before chat starts */}
+                    {!messages.some(m => m.role === "user") && (
+                      <div className="bg-amber-500/10 border border-amber-500/20 rounded-3xl p-5 mb-6 text-center space-y-3 font-sans relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/[0.03] to-purple-500/[0.03]" />
+                        <div className="flex items-center justify-center gap-2 text-amber-500 font-extrabold text-xs uppercase tracking-widest relative z-10">
+                          <Sparkles className="w-4 h-4 animate-pulse" />
+                          <span>Select Your Preferred Astrologer</span>
+                        </div>
+                        <p className="text-[12px] text-gray-300 leading-relaxed max-w-sm mx-auto relative z-10">
+                          Choose from our predefined list of 20 verified Vedic Astrologers specializing in Kundli, MATCHMAKING, Career, and Remedies before beginning your chat.
+                        </p>
+                        <div className="pt-1 relative z-10">
+                          <button
+                            onClick={() => setShowSelector(true)}
+                            className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-black font-black rounded-xl transition-all text-[11px] uppercase tracking-[0.15em] flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10 hover:scale-[1.02] active:scale-95 cursor-pointer"
+                          >
+                            <Users className="w-4 h-4" />
+                            Choose Your Personal Guide
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Professional Profile Card */}
                     <motion.div 
                       initial={{ y: 10, opacity: 0 }}
@@ -1137,7 +1359,7 @@ export const ChatWithAstrologer = () => {
               )}
 
               {/* Input Area */}
-              {!isPaymentRequired && !isQueueing && (
+              {!isPaymentRequired && !isQueueing && !isBusyWaiting && (
                 <div className="p-5 border-t border-white/10 bg-[#0c0c14] relative shrink-0">
                   <div className="absolute -top-px left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                   <div className="relative flex items-center gap-3">
