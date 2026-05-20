@@ -1,5 +1,4 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path from "path";
 import cors from "cors";
 import Razorpay from "razorpay";
@@ -25,11 +24,22 @@ async function startServer() {
     next();
   });
 
-  // Razorpay instance
-  const razorpay = new RazorpayConstructor({
-    key_id: process.env.RAZORPAY_KEY_ID || "",
-    key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-  });
+  // Lazy-loaded Razorpay helper to prevent startup crash if keys are missing
+  let razorpayInstance: any = null;
+  const getRazorpay = () => {
+    if (!razorpayInstance) {
+      const keyId = process.env.RAZORPAY_KEY_ID;
+      const keySecret = process.env.RAZORPAY_KEY_SECRET;
+      if (!keyId || !keySecret) {
+        throw new Error("Razorpay credentials (RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET) are missing.");
+      }
+      razorpayInstance = new RazorpayConstructor({
+        key_id: keyId,
+        key_secret: keySecret,
+      });
+    }
+    return razorpayInstance;
+  };
 
   // Meta CAPI Helper
   const hash = (val: any) => {
@@ -210,7 +220,7 @@ async function startServer() {
         receipt: `receipt_${Date.now()}`,
       };
 
-      const order = await razorpay.orders.create(options);
+      const order = await getRazorpay().orders.create(options);
       res.json(order);
     } catch (error) {
       console.error("[PAYMENT] Create Order Error:", error);
@@ -260,6 +270,7 @@ async function startServer() {
   });
 
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",

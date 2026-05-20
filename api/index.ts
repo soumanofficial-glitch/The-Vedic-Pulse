@@ -12,11 +12,22 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Razorpay instance
-const razorpay = new RazorpayConstructor({
-  key_id: process.env.RAZORPAY_KEY_ID || "",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-});
+// Lazy-loaded Razorpay helper to prevent startup crash if keys are missing
+let razorpayInstance: any = null;
+const getRazorpay = () => {
+  if (!razorpayInstance) {
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keyId || !keySecret) {
+      throw new Error("Razorpay credentials (RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET) are missing.");
+    }
+    razorpayInstance = new RazorpayConstructor({
+      key_id: keyId,
+      key_secret: keySecret,
+    });
+  }
+  return razorpayInstance;
+};
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -37,7 +48,7 @@ app.post("/api/create-order", async (req, res) => {
       receipt: `receipt_${Date.now()}`,
     };
 
-    const order = await razorpay.orders.create(options);
+    const order = await getRazorpay().orders.create(options);
     res.json(order);
   } catch (error) {
     console.error("Razorpay Create Order Error:", error);
